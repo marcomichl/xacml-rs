@@ -1,9 +1,8 @@
 mod test_types;
 
 use serde::{Deserialize, Serialize};
-use crate::xacml::enums::*;
 
-use super::enums::function::Function;
+use super::enums::*;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct PolicySet {
@@ -320,8 +319,8 @@ pub struct ApplyType {
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct FunctionType {
     #[serde(rename = "FunctionId")]
-    function_id: Function,        // More specific of URI type
-}
+    function_id: function::Function,   
+}     
 
 /// 5.29 AttributeDesignatorType definition
 /// Used to retrieve a bag of attributes from the request context
