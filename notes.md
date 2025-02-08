@@ -1,5 +1,9 @@
 # Notes to XACML-RS
 
+## Enums
+
+The enums describe possible content of various fields in the structs. E.g. the function table describes function IDs (in this case URIs) that are mapped to specific functions.
+
 ## Test cases
 
 Additional test cases to simple ones or the ones in the specification can be the conformance test elements, e.g. contained here (AuhtForze Project that adapted the 2.0 conformance test cases to the 3.0 specification).
