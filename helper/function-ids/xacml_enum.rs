@@ -1,9 +1,7 @@
 use std::str::FromStr;
 
-#[allow(dead_code)] 
-// During development it does not make sense to have dead code warngings here
-#[derive(PartialEq, Eq)]
-pub enum Function {
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum XacmlFunction {
     StringEqual,
     BooleanEqual,
     IntegerEqual,
@@ -258,8 +256,8 @@ pub enum Function {
     Rfc822NameSetEquals,
     AccessPermitted
 }
-    
-impl FromStr for Function {
+
+impl FromStr for XacmlFunction {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
