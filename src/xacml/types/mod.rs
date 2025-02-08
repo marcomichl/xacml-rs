@@ -1,4 +1,4 @@
-pub mod test_types;
+mod test_types;
 
 use serde::{Deserialize, Serialize};
 

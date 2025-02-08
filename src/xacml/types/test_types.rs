@@ -1,3 +1,5 @@
+#![allow(unused_imports)] 
+// Disable unused import warnings for tests
 #[cfg(test)]
 use super::*;
 use quick_xml::de::from_str;
