@@ -527,7 +527,7 @@ impl FromStr for Function {
 
 #[allow(dead_code)]
 impl Function {
-    pub fn to_xacml_uri(&self) -> &'static str {
+    pub fn to_xacml_id(&self) -> &'static str {
         match self {
             Self::StringEqual => "urn:oasis:names:tc:xacml:1.0:function:string-equal",
             Self::BooleanEqual => "urn:oasis:names:tc:xacml:1.0:function:boolean-equal",
@@ -791,7 +791,7 @@ impl Serialize for Function {
     where
         S: Serializer,
     {
-        serializer.serialize_str(self.to_xacml_uri())
+        serializer.serialize_str(self.to_xacml_id())
     }
 }
 
@@ -821,7 +821,7 @@ mod test_function {
     #[test]
     fn test_function_enum_to_str_mapping() {
         let function = Function::StringEqual;
-        assert_eq!(function.to_xacml_uri(), "urn:oasis:names:tc:xacml:1.0:function:string-equal");
+        assert_eq!(function.to_xacml_id(), "urn:oasis:names:tc:xacml:1.0:function:string-equal");
     }
 
     #[test]
