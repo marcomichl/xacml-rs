@@ -71,7 +71,7 @@ impl<'de> Deserialize<'de> for RuleCombiningAlgorithms {
         D: Deserializer<'de>,
     {
         let s: &str = Deserialize::deserialize(deserializer)?;
-        RuleCombiningAlgorithms::from_str(s).map_err( |_| serde::de::Error::custom("invalid function URI"))
+        RuleCombiningAlgorithms::from_str(s).map_err( |_| serde::de::Error::custom("invalid RuleCombiningAlgorithm URI"))
     }
 }
 

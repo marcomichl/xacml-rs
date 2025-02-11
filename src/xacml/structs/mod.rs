@@ -1,8 +1,10 @@
 mod test_types;
 
-use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 
-use super::enums::*;
+use serde::{Deserialize, Deserializer, Serialize};
+
+use super::enums::{combining_algorithms::RuleCombiningAlgorithms, data_types::DataType, *};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct PolicySet {
@@ -90,10 +92,10 @@ pub struct AllOfType {
 /// Shall contain a condition that must be fulfilled by the context to be applicable
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct MatchType {
-    #[serde(rename = "MatchId")]
+    #[serde(rename = "@MatchId")]
     match_id: String,                        // More specific of URI type
     #[serde(rename = "AttributeValue")]
-    attribute_value: String,
+    attribute_value: AttributeValueType,
     #[serde(rename = "AttributeDesignator", skip_serializing_if = "Option::is_none")]
     attribute_designator: Option<AttributeDesignator>,   // Either this or the attributeSelector must be present, not both and not none
     #[serde(rename = "AttributeSelector", skip_serializing_if = "Option::is_none")]
@@ -109,7 +111,7 @@ pub struct Policy {
     #[serde(rename = "@Version")]
     version: VersionType,
     #[serde(rename = "@RuleCombiningAlgId")]
-    rule_combining_alg_id: String,              // Combining algorithm, as of now string, might later be an enum
+    rule_combining_alg_id: RuleCombiningAlgorithms,              // Combining algorithm, as of now string, might later be an enum
     #[serde(rename = "@MaxDelegationDepth", skip_serializing_if = "Option::is_none")]
     max_delegation_depth: Option<i32>,
     #[serde(rename = "Description", skip_serializing_if = "Option::is_none")]
@@ -127,16 +129,12 @@ pub struct Policy {
     #[serde(rename = "VariableDefinition", skip_serializing_if = "Option::is_none")]
     variable_definition: Option<Vec<String>>,       // own type?
     #[serde(rename = "Rule")]
-    rule: Vec<Rule>,
+    rule: Vec<RuleType>,
     #[serde(rename = "ObligationExpressions", skip_serializing_if = "Option::is_none")]
     obligation_expressions: Option<Vec<String>>,
     #[serde(rename = "AdvideExpressions", skip_serializing_if = "Option::is_none")]
     advice_expressions: Option<Vec<String>>,
     
-}
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub struct Rule {
-
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
@@ -231,9 +229,9 @@ pub struct PolicySetCombinerParametersType {
 /// Defines a rule in a policy
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct RuleType {
-    #[serde(rename = "RuleId")]
+    #[serde(rename = "@RuleId")]
     rule_id: String,
-    #[serde(rename = "Effect")]
+    #[serde(rename = "@Effect")]
     effect: EffectType,
     #[serde(rename = "Description", skip_serializing_if = "Option::is_none")]
     description: Option<String>,
@@ -242,9 +240,9 @@ pub struct RuleType {
     #[serde(rename = "Condition", skip_serializing_if = "Option::is_none")]
     condition: Option<ConditionType>,
     #[serde(rename = "ObligationExpressions", skip_serializing_if = "Option::is_none")]
-    obligation_expressions: Option<Vec<String>>,
+    obligation_expressions: Option<ObligationExpressionsType>,
     #[serde(rename = "AdviceExpressions", skip_serializing_if = "Option::is_none")]
-    advice_expressions: Option<Vec<String>>
+    advice_expressions: Option<AdviceExpressionsType>
 }
 
 
@@ -358,12 +356,67 @@ pub struct AttributeSelectorType {
 
 /// 5.31 AttributeValueType definition
 /// Contains a literal attribute value
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+/// Is kind of a special case as the data type of the value is described by the DataType attribute
+#[derive(Serialize, PartialEq, Eq, Debug)]
 pub struct AttributeValueType {
-    #[serde(rename = "DataType")]
-    data_type: String,          // More specific of URI type
+    #[serde(rename = "@DataType")]
+    data_type: DataType,          // More specific of URI type
     #[serde(rename = "$value")]
-    value: String
+    value: Value
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[serde(untagged)]
+pub enum Value {
+    String(String),
+    Boolean(bool),
+    Integer(i64),
+    Double(EqF64)
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(transparent)]
+pub struct EqF64(f64);
+
+impl Eq for EqF64 {}
+
+impl PartialEq for EqF64 {
+    fn eq(&self, other: &EqF64) -> bool {
+        self.0.to_bits() == other.0.to_bits()
+    }
+}
+
+impl FromStr for EqF64 {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        s.parse::<f64>().map(EqF64).map_err(|_| ())
+    }
+}
+
+impl<'de> Deserialize<'de> for AttributeValueType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {       
+        #[derive(Deserialize)]
+        struct ValueHelper {
+            #[serde(rename = "@DataType")]
+            data_type: DataType,
+            #[serde(rename = "$value")]
+            value: String
+        }
+        
+        let helper = ValueHelper::deserialize(deserializer)?;
+
+        match helper.data_type {
+            DataType::String => Ok(AttributeValueType{data_type: helper.data_type, value: Value::String(helper.value)}),
+            DataType::Boolean => Ok(AttributeValueType{data_type: helper.data_type, value: Value::Boolean(helper.value.parse().map_err( |_| serde::de::Error::custom("Invalid boolean"))?)}),
+            DataType::Integer => Ok(AttributeValueType{data_type: helper.data_type, value: Value::Integer(helper.value.parse().map_err( |_| serde::de::Error::custom("Invalid integer"))?)}),
+            DataType::Double => Ok(AttributeValueType{data_type: helper.data_type, value: Value::Double(helper.value.parse().map_err( |_| serde::de::Error::custom("Invalid double"))?)}),
+            _ => Err(serde::de::Error::custom("Invalid data type"))
+        }
+    }
 }
 
 /// 5.32 OblicationsType definition
