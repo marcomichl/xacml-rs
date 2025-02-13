@@ -1,5 +1,6 @@
 mod test_types;
 
+use core::str;
 use std::str::FromStr;
 
 use serde::{Deserialize, Deserializer, Serialize};
@@ -54,9 +55,9 @@ pub struct PolicySet {
     poicy_set_combiner_parameters: Option<Vec<String>>
 }
 
+/// 5.3 PolicyIssuerType
 /// Type describing the issuer of a Policy or Policy set
 /// Defined in XACMLAdmin specification, if the PDP does not implement this, it should raise an error if it is contained
-/// As of now this is not implemented
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct PolicyIssuerType {
     // Free form XML content
@@ -104,6 +105,35 @@ pub struct MatchType {
     attribute_designator: Option<AttributeDesignator>,   // Either this or the attributeSelector must be present, not both and not none
     #[serde(rename = "AttributeSelector", skip_serializing_if = "Option::is_none")]
     attribute_selector: Option<AttributeSelector>
+}
+
+/// 5.10 PolicySetIdReferenceType
+/// Reference a PolicySet by the ID
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
+pub struct PolicySetIdReferenceType {
+    #[serde(flatten)]
+    id: IdReferenceType
+}
+
+/// IDReferenceType used in PolicySetIdReferenceType and PolicyIdReferenceType
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
+pub struct IdReferenceType {
+    #[serde(rename = "@Version", skip_serializing_if = "Option::is_none")]
+    version: Option<VersionMatchType>,
+    #[serde(rename = "@EarliestVersion", skip_serializing_if = "Option::is_none")]
+    earliest_version: Option<VersionMatchType>,                // Earliest version
+    #[serde(rename = "@LatestVersion", skip_serializing_if = "Option::is_none")]
+    latest_version: Option<VersionMatchType>,                  // Latest version
+    #[serde(rename = "$value")]
+    id: String                               // More specific an URI, IdReferenceType extends URI
+}
+
+/// 5.11 PolicyIdReferenceType
+/// Reference a Policy by the ID
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
+pub struct PolicyIdReferenceType {
+    #[serde(flatten)]
+    id: IdReferenceType
 }
 
 /// 5.14 Policy element
@@ -158,15 +188,6 @@ pub struct AttributeDesignator {
 pub struct AttributeSelector {
 }
 
-/// Extends the xs:anyURI type
-/// The referenced policy set with the id has to match the remaining attributes
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub struct IdReferenceType {
-    id: String,                                 // More specific of URI type
-    version: Option<VersionMatchType>,                        // Exact version
-    earliest_version: Option<VersionMatchType>,                // Earliest version
-    latest_version: Option<VersionMatchType>,                  // Latest version
-}
 
 /// 5.13 VersionMatchType
 /// Type for the version attribute of the policy set or policy
@@ -337,7 +358,7 @@ pub struct AttributeDesignatorType{
     #[serde(rename = "AttributeId")]
     attribute_id: String,       // More specific of URI type
     #[serde(rename = "DataType")]
-    data_type: String,          // More specific of URI type
+    data_type: DataType,          // More specific of URI type
     #[serde(rename = "Category")]
     category: String,           // More specific of URI type
     #[serde(rename = "MustBePresent")]
@@ -531,4 +552,181 @@ pub struct AttributeAssignmentExpressionType {
     issuer: Option<String>,
     #[serde(rename = "Expression")]
     expression: Vec<ExpressionType>
+}
+
+///5.42 RequestType
+/// Contains the request for a decision
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+pub struct RequestType {
+    #[serde(rename = "@ReturnPolicyIdList")]
+    return_policy_id_list: bool,
+    #[serde(rename = "@CombinedDecision")]
+    combined_decision: bool,
+    #[serde(rename = "RequestDefaults", skip_serializing_if = "Option::is_none")]
+    request_defaults: Option<RequestDefaultsType>,
+    #[serde(rename = "Attributes")]
+    attributes: Vec<AttributesType>,
+    #[serde(rename = "MultiRequests", skip_serializing_if = "Option::is_none", deserialize_with = "fail_optional_field")]
+    multi_requests: Option<String> // Is not yet implemented and optional, will fail if present
+}
+
+fn fail_optional_field<'de, D> (deserializer: D) -> Result<Option<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{   
+    let x: &str = Deserialize::deserialize(deserializer)?;
+
+    Err(serde::de::Error::custom(format!("Field must not be present: {}", x)))
+}
+
+/// 5.43 RequestDefaultsType
+/// Contains the XPath Version for the request
+/// Optional
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+pub struct RequestDefaultsType {
+    #[serde(rename = "XPathVersion")]
+    x_path_version: String,     // More specific of URI type
+}
+
+/// 5.44 AttributesType
+/// Contains a set of attributes
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+pub struct AttributesType {
+    #[serde(rename = "@Category")]
+    category: String,           //Specifies for what type of entity this attributes are defined
+    #[serde(rename = "@xml:id", skip_serializing_if = "Option::is_none")]
+    xml_id: Option<String>,     // Unique identifier for the attributes
+    #[serde(rename = "Content", skip_serializing_if = "Option::is_none")]
+    content: Option<Content>,        // Type 5.45, defined as sequence with 0 or 1 occurance
+    #[serde(rename = "Attribute", skip_serializing_if = "Option::is_none")]
+    attribute: Option<Vec<AttributeType>>    // Type 5.46, defined as sequence with ANY number
+}
+
+/// 5.45 ContentType
+/// Placeholder for additional attributes, typically content of the resource
+/// Optional, not that reasoned implemented
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+pub struct Content {
+    #[serde(rename = "Any")]
+    any: String        // Any XML content
+}
+
+/// 5.46 AttributeType
+/// Contains a single attribute metadata and value
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+pub struct AttributeType {
+    #[serde(rename = "@AttributeId")]
+    attribute_id: String,       // Pre-defined URIs in the Annex B, but contain only commonly used; might be implemented as enum
+    #[serde(rename = "@IncludeInResult", default = "default_false")]
+    include_in_result: bool,
+    #[serde(rename = "@Issuer", skip_serializing_if = "Option::is_none")]
+    issuer: Option<String>,    
+    #[serde(rename = "AttributeValue")]
+    attribute_value: Vec<AttributeValueType>
+}
+
+fn default_false() -> bool {
+    false
+}   
+
+/// 5.47 ResponseType
+/// Standard return type for a decision request
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+pub struct ResponseType {
+    #[serde(rename = "Result")]
+    result: Vec<ResultType>
+}
+
+/// 5.48 ResultType
+/// Contains the result of a decision request
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+pub struct ResultType {
+    #[serde(rename = "Decision")]
+    decision: DecisionType,
+    #[serde(rename = "Status", skip_serializing_if = "Option::is_none")]
+    status: Option<StatusType>,
+    #[serde(rename = "Obligations", skip_serializing_if = "Option::is_none")]
+    obligations: Option<ObligationsType>,
+    #[serde(rename = "AssociatedAdvice", skip_serializing_if = "Option::is_none")]
+    associated_advice: Option<AssociatedAdviceType>,
+    #[serde(rename = "Attributes", skip_serializing_if = "Option::is_none")]
+    attributes: Option<Vec<AttributesType>>,
+    #[serde(rename = "PolicyIdentifierList", skip_serializing_if = "Option::is_none")]
+    policy_identifier_list: Option<PolicyIdentifierListType> // If set the return_policy_id_list true, this list contains policies that are fully-applicable
+}
+
+/// 5.49 PolicyIdentifierListType
+/// Contains a list of policy identifiers
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+pub struct PolicyIdentifierListType {
+    #[serde(rename = "PolicyIdReference", skip_serializing_if = "Option::is_none")]
+    policy_id_reference: Option<Vec<PolicyIdReferenceType>>,
+    #[serde(rename = "PolicySetIdReference", skip_serializing_if = "Option::is_none")]
+    policy_set_id_reference: Option<Vec<PolicySetIdReferenceType>>
+}
+
+/// 5.50 - 5.52 are optional and skipped
+/// 5.53 DecisionType
+/// Enumeration to indicate the decision of a policy
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+pub enum DecisionType {
+    Permit,
+    Deny,
+    Indeterminate,
+    NotApplicable
+}
+
+/// 5.54 StatusType
+/// Contains the status of a decision request
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+pub struct StatusType {
+    #[serde(rename = "StatusCode")]
+    status_code: StatusCodeType,
+    #[serde(rename = "StatusMessage", skip_serializing_if = "Option::is_none")]
+    status_message: Option<StatusMessageType>,
+    #[serde(rename = "StatusDetail", skip_serializing_if = "Option::is_none")]
+    status_detail: Option<StatusDetailType>
+}
+
+/// 5.55 StatusCodeType
+/// Contains the status code of a decision request
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+pub struct StatusCodeType {
+    #[serde(rename = "@Value")]
+    value: String,          // see Annex B.8 for values / implementation as enum 
+    #[serde(rename = "StatusCode", skip_serializing_if = "Option::is_none")]
+    status_code: Option<Vec<StatusCodeType>>     //Minor codes
+}
+
+/// 5.56 StatusMessageType
+/// Contains the status message of a decision request
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+pub struct StatusMessageType {
+    #[serde(rename = "$value")]
+    value: String
+}
+
+/// 5.57 StatusDetailType
+/// Contains the status detail of a decision request
+/// Optional, therefore not that reasoned implemented
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+pub struct StatusDetailType {
+    #[serde(rename = "Any")]
+    any: String
+}
+
+/// 5.58 MissingAttributeDetailType
+/// Contains the status detail of a missing attribute
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+pub struct MissingAttributeDetailType {
+    #[serde(rename = "@Category")]
+    category: String,           // More specific of URI type
+    #[serde(rename = "@AttributeId")]
+    attribute_id: String,       // More specific of URI type
+    #[serde(rename = "@DataType")]
+    data_type: DataType,          // Not direcly specified as DataTypeEnum?
+    #[serde(rename = "@Issuer", skip_serializing_if = "Option::is_none")]
+    issuer: Option<String>,
+    #[serde(rename = "$value", skip_serializing_if = "Option::is_none")]
+    attribute_value: Option<Vec<AttributeValueType>>        
 }

@@ -1,1 +1,1 @@
-// Implementation of Status Codes is optional and skipped as of now.
+// See annex B.8 for the various status codes

@@ -46,9 +46,10 @@ fn test_simple_policy() {
     </Rule>
  </Policy>"#;
     let policy_object: Policy = from_str(policy).unwrap();
-    let string = to_string(&policy_object).unwrap();
-    print!("Policy Struct: \n \n {:?}\n\n", policy_object);
-    print!("Serialized Struct: \n \n {}", string);
+    to_string(&policy_object).unwrap();
+    //let string = to_string(&policy_object).unwrap();
+    //print!("Policy Struct: \n \n {:?}\n\n", policy_object);
+    //print!("Serialized Struct: \n \n {}", string);
 }
 
 #[test]
@@ -98,7 +99,8 @@ fn conformance_test() {
     </Rule>
 </Policy>"#;
     let policy_object: Policy = from_str(policy).unwrap();
-    let string = to_string(&policy_object).unwrap();
-    print!("Policy Struct: \n \n {:?}\n\n", policy_object);
-    print!("Serialized Struct: \n \n {}", string);
+    to_string(&policy_object).unwrap();
+    //let string = to_string(&policy_object).unwrap();
+    //print!("Policy Struct: \n \n {:?}\n\n", policy_object);
+    //print!("Serialized Struct: \n \n {}", string);
 }
