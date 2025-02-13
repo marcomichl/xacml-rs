@@ -9,7 +9,7 @@ pub mod error {
     pub struct XacmlError {
         details: String
     }
-
+    #[allow(dead_code)]
     impl XacmlError {
         pub fn new(msg: &str) -> XacmlError {
             XacmlError{details: msg.to_string()}

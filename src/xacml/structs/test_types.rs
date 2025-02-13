@@ -46,8 +46,59 @@ fn test_simple_policy() {
     </Rule>
  </Policy>"#;
     let policy_object: Policy = from_str(policy).unwrap();
-    let String = to_string(&policy_object).unwrap();
+    let string = to_string(&policy_object).unwrap();
     print!("Policy Struct: \n \n {:?}\n\n", policy_object);
-    print!("Serialized Struct: \n \n {}", String);
+    print!("Serialized Struct: \n \n {}", string);
 }
 
+#[test]
+fn conformance_test() {
+    let policy = r#"<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Policy xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PolicyId="urn:oasis:names:tc:xacml:2.0:conformance-test:IIA1:policy" RuleCombiningAlgId="urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-overrides" Version="1.0">
+    <Description>
+        Policy for Conformance Test IIA001.
+    </Description>
+    <Target/>
+    <Rule Effect="Permit" RuleId="urn:oasis:names:tc:xacml:2.0:conformance-test:IIA1:rule">
+        <Description>
+            Julius Hibbert can read or write Bart Simpson's medical record.
+        </Description>
+        <Target>
+            <AnyOf>
+                <AllOf>
+                    <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+                        <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Julius Hibbert</AttributeValue>
+                        <AttributeDesignator AttributeId="urn:oasis:names:tc:xacml:1.0:subject:subject-id" Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject" DataType="http://www.w3.org/2001/XMLSchema#string" MustBePresent="false"/>
+                    </Match>
+                </AllOf>
+            </AnyOf>
+            <AnyOf>
+                <AllOf>
+                    <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:anyURI-equal">
+                        <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#anyURI">http://medico.com/record/patient/BartSimpson</AttributeValue>
+                        <AttributeDesignator AttributeId="urn:oasis:names:tc:xacml:1.0:resource:resource-id" Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource" DataType="http://www.w3.org/2001/XMLSchema#anyURI" MustBePresent="false"/>
+                    </Match>
+                </AllOf>
+            </AnyOf>
+            <AnyOf>
+                <AllOf>
+                    <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+                        <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">read</AttributeValue>
+                        <AttributeDesignator AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action" DataType="http://www.w3.org/2001/XMLSchema#string" MustBePresent="false"/>
+                    </Match>
+                </AllOf>
+                <AllOf>
+                    <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+                        <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">write</AttributeValue>
+                        <AttributeDesignator AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action" DataType="http://www.w3.org/2001/XMLSchema#string" MustBePresent="false"/>
+                    </Match>
+                </AllOf>
+            </AnyOf>
+        </Target>
+    </Rule>
+</Policy>"#;
+    let policy_object: Policy = from_str(policy).unwrap();
+    let string = to_string(&policy_object).unwrap();
+    print!("Policy Struct: \n \n {:?}\n\n", policy_object);
+    print!("Serialized Struct: \n \n {}", string);
+}

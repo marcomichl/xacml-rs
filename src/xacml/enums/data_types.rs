@@ -81,6 +81,7 @@ impl<'de> Deserialize<'de> for DataType {
     }
 }
 
+#[cfg(test)]
 mod test_data_type{
     #[cfg(test)]
     use super::*;
@@ -91,7 +92,7 @@ mod test_data_type{
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
     struct TestData{
         #[serde(rename = "dataType")]
-        data_type: DataType,
+        data_type: DataType
     }
 
     #[test]

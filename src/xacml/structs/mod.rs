@@ -4,17 +4,21 @@ use std::str::FromStr;
 
 use serde::{Deserialize, Deserializer, Serialize};
 
-use super::enums::{combining_algorithms::RuleCombiningAlgorithms, data_types::DataType, *};
+use super::enums::{combining_algorithms::{PolicyCombiningAlgorithms, RuleCombiningAlgorithms}, data_types::DataType, *};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct PolicySet {
-    #[serde(rename = "PolicySetId")]
+    #[serde(rename = "@xmlns")]
+    xmlns: String,
+    #[serde(rename = "@xmlns:xsi")]
+    xmlns_xsi: String,
+    #[serde(rename = "@PolicySetId")]
     policy_set_id: String,
-    #[serde(rename = "Version")]
+    #[serde(rename = "@Version")]
     version: VersionType,
-    #[serde(rename = "PolicyCombiningAlgId")]
-    policy_combining_alg_id: String, // Combining algorithm, as of now string, might later be an enum
-    #[serde(rename = "MaxDelegationDepth", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "@PolicyCombiningAlgId")]
+    policy_combining_alg_id: PolicyCombiningAlgorithms, // Combining algorithm, as of now string, might later be an enum
+    #[serde(rename = "@MaxDelegationDepth", skip_serializing_if = "Option::is_none")]
     max_delegation_depth: Option<i32>,
     // 5.2 Description element
     #[serde(rename = "Description", skip_serializing_if = "Option::is_none")]
@@ -106,6 +110,10 @@ pub struct MatchType {
 /// Describes a policy as smallest unit useable by a PDP
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct Policy {
+    #[serde(rename = "@xmlns")]
+    xmlns: String,
+    #[serde(rename = "@xmlns:xsi")]
+    xmlns_xsi: String,
     #[serde(rename = "@PolicyId")]
     policy_id: String,                          // More specific of URI type
     #[serde(rename = "@Version")]
@@ -413,6 +421,7 @@ impl<'de> Deserialize<'de> for AttributeValueType {
             DataType::String => Ok(AttributeValueType{data_type: helper.data_type, value: Value::String(helper.value)}),
             DataType::Boolean => Ok(AttributeValueType{data_type: helper.data_type, value: Value::Boolean(helper.value.parse().map_err( |_| serde::de::Error::custom("Invalid boolean"))?)}),
             DataType::Integer => Ok(AttributeValueType{data_type: helper.data_type, value: Value::Integer(helper.value.parse().map_err( |_| serde::de::Error::custom("Invalid integer"))?)}),
+            DataType::AnyURI => Ok(AttributeValueType{data_type: helper.data_type, value: Value::String(helper.value)}),
             DataType::Double => Ok(AttributeValueType{data_type: helper.data_type, value: Value::Double(helper.value.parse().map_err( |_| serde::de::Error::custom("Invalid double"))?)}),
             _ => Err(serde::de::Error::custom("Invalid data type"))
         }
