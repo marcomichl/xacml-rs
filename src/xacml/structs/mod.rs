@@ -8,11 +8,12 @@ use serde::{Deserialize, Deserializer, Serialize};
 use super::enums::{combining_algorithms::{PolicyCombiningAlgorithms, RuleCombiningAlgorithms}, data_types::DataType, *};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub struct PolicySet {
-    #[serde(rename = "@xmlns")]
-    xmlns: String,
-    #[serde(rename = "@xmlns:xsi")]
-    xmlns_xsi: String,
+#[serde(rename = "PolicySet")]
+pub struct PolicySetType {
+    #[serde(rename = "@xmlns", skip_serializing_if = "Option::is_none")]
+    xmlns: Option<String>,
+    #[serde(rename = "@xmlns:xsi", skip_serializing_if = "Option::is_none")]
+    xmlns_xsi: Option<String>,
     #[serde(rename = "@PolicySetId")]
     policy_set_id: String,
     #[serde(rename = "@Version")]
@@ -34,9 +35,9 @@ pub struct PolicySet {
     #[serde(rename = "Target")]
     target: TargetType,
     #[serde(rename = "PolicySet", skip_serializing_if = "Option::is_none")]  // Might be any number (including 0) -> might be necessary to make it an option, so that complete missing fields are accepted (not only empty vecs)
-    policy_set: Option<Vec<PolicySet>>,
+    policy_set: Option<Vec<PolicySetType>>,
     #[serde(rename = "Policy", skip_serializing_if = "Option::is_none")]  // Might be any number (including 0)
-    policy: Option<Vec<Policy>>,
+    policy: Option<Vec<PolicyType>>,
     // 5.10 PolicySetIdReference element
     #[serde(rename = "PolicySetIdReference", skip_serializing_if = "Option::is_none")]  // Reference to a policy that must be included in the PolicySet
     policy_set_id_reference: Option<Vec<IdReferenceType>>,
@@ -44,15 +45,15 @@ pub struct PolicySet {
     #[serde(rename = "PolicyIdReference", skip_serializing_if = "Option::is_none")]  // Reference to a policy that must be included in the Policy
     policy_id_reference: Option<Vec<IdReferenceType>>,
     #[serde(rename = "ObligationExpressions", skip_serializing_if = "Option::is_none")]
-    obligation_expressions: Option<Vec<String>>,
+    obligation_expressions: Option<Vec<ObligationExpressionsType>>,
     #[serde(rename = "AdvideExpressions", skip_serializing_if = "Option::is_none")]
-    advice_expressions: Option<Vec<String>>,
+    advice_expressions: Option<Vec<AdviceExpressionsType>>,
     #[serde(rename = "CombinerParameters", skip_serializing_if = "Option::is_none")]
-    combiner_parameters: Option<Vec<String>>,
+    combiner_parameters: Option<Vec<CombinerParametersType>>,
     #[serde(rename = "PolicyCombinerParameters", skip_serializing_if = "Option::is_none")]
-    policy_combiner_parameters: Option<Vec<String>>,
+    policy_combiner_parameters: Option<Vec<PolicySetCombinerParametersType>>,
     #[serde(rename = "PolicySetCombinerParameters", skip_serializing_if = "Option::is_none")]
-    poicy_set_combiner_parameters: Option<Vec<String>>
+    poicy_set_combiner_parameters: Option<Vec<PolicySet>>
 }
 
 /// 5.3 PolicyIssuerType
@@ -139,11 +140,12 @@ pub struct PolicyIdReferenceType {
 /// 5.14 Policy element
 /// Describes a policy as smallest unit useable by a PDP
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub struct Policy {
-    #[serde(rename = "@xmlns")]
-    xmlns: String,
-    #[serde(rename = "@xmlns:xsi")]
-    xmlns_xsi: String,
+#[serde(rename = "Policy")]
+pub struct PolicyType {
+    #[serde(rename = "@xmlns", skip_serializing_if = "Option::is_none")]
+    xmlns: Option<String>,
+    #[serde(rename = "@xmlns:xsi", skip_serializing_if = "Option::is_none")]
+    xmlns_xsi: Option<String>,
     #[serde(rename = "@PolicyId")]
     policy_id: String,                          // More specific of URI type
     #[serde(rename = "@Version")]
@@ -169,9 +171,9 @@ pub struct Policy {
     #[serde(rename = "Rule")]
     rule: Vec<RuleType>,
     #[serde(rename = "ObligationExpressions", skip_serializing_if = "Option::is_none")]
-    obligation_expressions: Option<Vec<String>>,
+    obligation_expressions: Option<Vec<ObligationExpressionsType>>,
     #[serde(rename = "AdvideExpressions", skip_serializing_if = "Option::is_none")]
-    advice_expressions: Option<Vec<String>>,
+    advice_expressions: Option<Vec<AdviceExpressionsType>>,
     
 }
 
@@ -304,6 +306,7 @@ pub struct VariableReferenceType {
 
 /// 5.25 Expression Substitution Group definition
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[serde(untagged)]
 pub enum ExpressionType {
     #[serde(rename = "Apply")]
     Apply(ApplyType),
@@ -325,7 +328,7 @@ pub enum ExpressionType {
 /// Might also be flattened?
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct ConditionType {
-    #[serde(rename = "Expression")]
+    #[serde(rename = "$value")]
     expression: Vec<ExpressionType>
 }
 
@@ -333,11 +336,11 @@ pub struct ConditionType {
 /// Describes the application of a function to its arguments
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct ApplyType {
-    #[serde(rename = "FunctionId")]
+    #[serde(rename = "@FunctionId")]
     function_id: String,        // More specific of URI type
-    #[serde(rename = "Description", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "@Description", skip_serializing_if = "Option::is_none")]
     description: Option<String>,
-    #[serde(rename = "Expression", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "$value",skip_serializing_if = "Option::is_none")] 
     expression: Option<Vec<ExpressionType>>
 }
 
@@ -444,7 +447,7 @@ impl<'de> Deserialize<'de> for AttributeValueType {
             DataType::Integer => Ok(AttributeValueType{data_type: helper.data_type, value: Value::Integer(helper.value.parse().map_err( |_| serde::de::Error::custom("Invalid integer"))?)}),
             DataType::AnyURI => Ok(AttributeValueType{data_type: helper.data_type, value: Value::String(helper.value)}),
             DataType::Double => Ok(AttributeValueType{data_type: helper.data_type, value: Value::Double(helper.value.parse().map_err( |_| serde::de::Error::custom("Invalid double"))?)}),
-            _ => Err(serde::de::Error::custom("Invalid data type"))
+            _ => Err(serde::de::Error::custom("Unimplemented data type"))
         }
     }
 }
@@ -488,6 +491,7 @@ pub struct AdviceType {
 /// 5.36 AttributeAssignmentType definition
 /// Used to include arguments in obligations and advices
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[serde(rename = "AttributeAssignment")]
 pub struct AttributeAssignmentType {
     #[serde(flatten)]
     attribute: AttributeValueType,
@@ -503,7 +507,7 @@ pub struct AttributeAssignmentType {
 /// Contains a set of obligation expressions
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct ObligationExpressionsType {
-    #[serde(rename = "ObligationExpression")]
+    #[serde(rename = "$value")]
     obligation_expressions: Vec<ObligationExpressionType>
 }
 
@@ -519,11 +523,11 @@ pub struct AdviceExpressionsType {
 /// Element that evaluates to an obligation
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct ObligationExpressionType {
-    #[serde(rename = "ObligationId")]
+    #[serde(rename = "@ObligationId")]
     obligation_id: String,      // More specific of URI type
-    #[serde(rename = "FulfillOn")]
+    #[serde(rename = "@FulfillOn")]
     fulfill_on: EffectType,
-    #[serde(rename = "AttributeAssignment", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "$value", skip_serializing_if = "Option::is_none")]
     attribute_assignment: Option<Vec<AttributeAssignmentType>>
 }
 
@@ -532,25 +536,26 @@ pub struct ObligationExpressionType {
 /// Element that evaluates to an advice
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct AdviceExpressionType {
-    #[serde(rename = "AdviceId")]
+    #[serde(rename = "@AdviceId")]
     advice_id: String,          // More specific of URI type
-    #[serde(rename = "AppliesTo")]
+    #[serde(rename = "@AppliesTo")]
     applies_to: EffectType,
-    #[serde(rename = "AttributeAssignment", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "$value", skip_serializing_if = "Option::is_none")]
     attribute_assignment: Option<Vec<AttributeAssignmentType>>
 }
 
 /// 5.41 AttributeAssignmentExpressionType definition
 /// Used to include arguments in obligations and advices
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[serde(rename = "AttributeAssignmentExpression")]
 pub struct AttributeAssignmentExpressionType {
-    #[serde(rename = "AttributeId")]
+    #[serde(rename = "@AttributeId")]
     attribute_id: String,       // More specific of URI type
-    #[serde(rename = "Category", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "@Category", skip_serializing_if = "Option::is_none")]
     category: Option<String>,          // More specific of URI type
-    #[serde(rename = "Issuer", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "@Issuer", skip_serializing_if = "Option::is_none")]
     issuer: Option<String>,
-    #[serde(rename = "Expression")]
+    #[serde(rename = "$value")]
     expression: Vec<ExpressionType>
 }
 
