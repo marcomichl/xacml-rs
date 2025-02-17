@@ -53,7 +53,7 @@ pub struct PolicySetType {
     #[serde(rename = "PolicyCombinerParameters", skip_serializing_if = "Option::is_none")]
     policy_combiner_parameters: Option<Vec<PolicySetCombinerParametersType>>,
     #[serde(rename = "PolicySetCombinerParameters", skip_serializing_if = "Option::is_none")]
-    poicy_set_combiner_parameters: Option<Vec<PolicySet>>
+    poicy_set_combiner_parameters: Option<Vec<PolicySetCombinerParametersType>>
 }
 
 /// 5.3 PolicyIssuerType
@@ -306,7 +306,7 @@ pub struct VariableReferenceType {
 
 /// 5.25 Expression Substitution Group definition
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
-#[serde(untagged)]
+//#[serde(untagged)]
 pub enum ExpressionType {
     #[serde(rename = "Apply")]
     Apply(ApplyType),
@@ -348,7 +348,7 @@ pub struct ApplyType {
 /// Used to name a function in the ApplyType
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct FunctionType {
-    #[serde(rename = "FunctionId")]
+    #[serde(rename = "@FunctionId")]
     function_id: function::Function,   
 }     
 
@@ -358,31 +358,31 @@ pub struct FunctionType {
 /// In case it is not contained, an error is raised according to the MustBePresent attribute
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct AttributeDesignatorType{
-    #[serde(rename = "AttributeId")]
+    #[serde(rename = "@AttributeId")]
     attribute_id: String,       // More specific of URI type
-    #[serde(rename = "DataType")]
+    #[serde(rename = "@DataType")]
     data_type: DataType,          // More specific of URI type
-    #[serde(rename = "Category")]
+    #[serde(rename = "@Category")]
     category: String,           // More specific of URI type
-    #[serde(rename = "MustBePresent")]
+    #[serde(rename = "@MustBePresent")]
     must_be_present: bool,
-    #[serde(rename = "Issuer", skip_serializing_if = "Option::is_none")]
-    issuer: Option<String>     
+    #[serde(rename = "@Issuer", skip_serializing_if = "Option::is_none")]
+    issuer: Option<String>
 }
 
 /// 5.30 AttributeSelectorType definition
 /// Used to retrieve a bag of unnamed and uncategorized attributes from the request context
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct AttributeSelectorType {
-    #[serde(rename = "Category")]
+    #[serde(rename = "@Category")]
     category: String,           // More specific of URI type
-    #[serde(rename = "ContextSelectorId")]
-    context_selector_id: String,       // More specific of URI type
-    #[serde(rename = "Path")]
+    #[serde(rename = "@ContextSelectorId", skip_serializing_if = "Option::is_none")]
+    context_selector_id: Option<String>,       // More specific of URI type
+    #[serde(rename = "@Path")]
     path: String,               
-    #[serde(rename = "DataType")]
+    #[serde(rename = "@DataType")]
     data_type: String,          // More specific of URI type
-    #[serde(rename = "MustBePresent")]
+    #[serde(rename = "@MustBePresent")]
     must_be_present: bool
 }
 
@@ -438,8 +438,12 @@ impl<'de> Deserialize<'de> for AttributeValueType {
             #[serde(rename = "$value")]
             value: String
         }
-        
-        let helper = ValueHelper::deserialize(deserializer)?;
+        /* 
+        let str: String = Deserialize::deserialize(deserializer)?;
+        print!("{}", str);
+        Err(serde::de::Error::custom("DEBUG"))
+        */ // /*
+        let helper = ValueHelper::deserialize(deserializer).map_err (|_| serde::de::Error::custom("Helper deserialization failed"))?;
 
         match helper.data_type {
             DataType::String => Ok(AttributeValueType{data_type: helper.data_type, value: Value::String(helper.value)}),
@@ -449,6 +453,7 @@ impl<'de> Deserialize<'de> for AttributeValueType {
             DataType::Double => Ok(AttributeValueType{data_type: helper.data_type, value: Value::Double(helper.value.parse().map_err( |_| serde::de::Error::custom("Invalid double"))?)}),
             _ => Err(serde::de::Error::custom("Unimplemented data type"))
         }
+        //*/
     }
 }
 
@@ -493,13 +498,13 @@ pub struct AdviceType {
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 #[serde(rename = "AttributeAssignment")]
 pub struct AttributeAssignmentType {
-    #[serde(flatten)]
-    attribute: AttributeValueType,
-    #[serde(rename = "AttributeId")]
+    #[serde(rename = "$value")]
+    attribute: ExpressionType,
+    #[serde(rename = "@AttributeId")]
     attribute_id: String,       // More specific of URI type
-    #[serde(rename = "Category", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "@Category", skip_serializing_if = "Option::is_none")]
     category: Option<String>,          // More specific of URI type
-    #[serde(rename = "Issuer", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "@Issuer", skip_serializing_if = "Option::is_none")]
     issuer: Option<String>
 }
 
@@ -507,7 +512,7 @@ pub struct AttributeAssignmentType {
 /// Contains a set of obligation expressions
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct ObligationExpressionsType {
-    #[serde(rename = "$value")]
+    #[serde(rename = "ObligationExpression")]
     obligation_expressions: Vec<ObligationExpressionType>
 }
 
@@ -527,8 +532,8 @@ pub struct ObligationExpressionType {
     obligation_id: String,      // More specific of URI type
     #[serde(rename = "@FulfillOn")]
     fulfill_on: EffectType,
-    #[serde(rename = "$value", skip_serializing_if = "Option::is_none")]
-    attribute_assignment: Option<Vec<AttributeAssignmentType>>
+    #[serde(rename = "AttributeAssignmentExpression", skip_serializing_if = "Option::is_none")]
+    attribute_assignment: Option<Vec<AttributeAssignmentExpressionType>>
 }
 
 
@@ -571,17 +576,31 @@ pub struct RequestType {
     request_defaults: Option<RequestDefaultsType>,
     #[serde(rename = "Attributes")]
     attributes: Vec<AttributesType>,
-    #[serde(rename = "MultiRequests", skip_serializing_if = "Option::is_none", deserialize_with = "fail_optional_field")]
-    multi_requests: Option<String> // Is not yet implemented and optional, will fail if present
+    #[serde(rename = "MultiRequests", skip_serializing_if = "UnimplementedField::is_none")]
+    multi_requests: UnimplementedField // Is not yet implemented and optional, will fail if present
 }
 
-fn fail_optional_field<'de, D> (deserializer: D) -> Result<Option<String>, D::Error>
-where
-    D: Deserializer<'de>,
-{   
-    let x: &str = Deserialize::deserialize(deserializer)?;
-
-    Err(serde::de::Error::custom(format!("Field must not be present: {}", x)))
+#[derive(Serialize, PartialEq, Eq, Debug)]
+struct UnimplementedField(Option<String>);
+impl<'de> Deserialize<'de> for UnimplementedField {
+    fn deserialize<D>(deserializer: D) -> Result<UnimplementedField, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let x: Option<String> = Deserialize::deserialize(deserializer)?;
+        if x.is_some() {
+            Err(serde::de::Error::custom(format!("Field must not be present: {}", x.unwrap())))
+        }
+        else {
+            Ok(Self(None))
+        }
+    
+    }
+}
+impl UnimplementedField {
+    fn is_none(&self) -> bool {
+        self.0.is_none()
+    }
 }
 
 /// 5.43 RequestDefaultsType
@@ -612,8 +631,15 @@ pub struct AttributesType {
 /// Optional, not that reasoned implemented
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct Content {
-    #[serde(rename = "Any")]
+    #[serde(rename = "AnyName", deserialize_with = "store_as_string")]
     any: String        // Any XML content
+}
+
+fn store_as_string<'de, D>(deserializer: D) -> Result<String, D::Error> 
+where D: Deserializer<'de>, 
+{
+    let x: String = Deserialize::deserialize(deserializer)?;
+    Ok(x)
 }
 
 /// 5.46 AttributeType

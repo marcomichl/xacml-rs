@@ -19,7 +19,6 @@
         </Condition>
     </Rule>
     
-    
     <ObligationExpressions>
         <ObligationExpression FulfillOn="Permit" ObligationId="urn:oasis:names:tc:xacml:2.0:conformance-test:IIIA340:obligation-1">
             <AttributeAssignmentExpression AttributeId="urn:oasis:names:tc:xacml:2.0:conformance-test:IIIA340:assignment1">
@@ -49,7 +48,7 @@
         </ObligationExpression>
     </ObligationExpressions>
 
-     
+
     <AdviceExpressions>
         <AdviceExpression AppliesTo="Permit" AdviceId="urn:oasis:names:tc:xacml:2.0:conformance-test:IIIA340:Advice-1">
             <AttributeAssignmentExpression AttributeId="urn:oasis:names:tc:xacml:2.0:conformance-test:IIIA340:assignment1">
@@ -78,7 +77,6 @@
             </AttributeAssignmentExpression>
         </AdviceExpression>
     </AdviceExpressions>
-
     
 </Policy>
 
