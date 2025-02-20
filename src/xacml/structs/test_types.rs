@@ -85,6 +85,8 @@ fn test_xacml_deserialization() {
     let mut successful_tests = Vec::new();
     let mut number_successful_tests = 0;
 
+    let quiet: bool  = true;
+
     for category in &categories {
         // as of now, only include mandatory tests
         if category != &"mandatory" {
@@ -110,7 +112,9 @@ fn test_xacml_deserialization() {
                     if let Err(e) = deserialize_file::<PolicySetOrPolicy>(&policy_file) {
                         if let quick_xml::DeError::Custom(msg) = &e {
                             if msg == "IGNORED" {
-                                println!("Skipping test {:?} due to unimplemented data type", test_case_dir);
+                                if (!quiet) {
+                                    println!("Skipping test {:?} due to unimplemented data type", test_case_dir);
+                                }
                                 continue;
                             }
                         }
@@ -125,7 +129,9 @@ fn test_xacml_deserialization() {
                     if let Err(e) = deserialize_file::<RequestType>(&request_file) {
                         if let quick_xml::DeError::Custom(msg) = &e {
                             if msg == "No such file or directory (os error 2)" || msg == "IGNORED" {
-                                println!("Skipping test 'Request' {:?} due to unavailable file or unimplemented data type", test_case_dir);
+                                if (!quiet) {
+                                    println!("Skipping test 'Request' {:?} due to unavailable file or unimplemented data type", test_case_dir);
+                                }
                                 continue;
                             }
                         }
@@ -139,7 +145,9 @@ fn test_xacml_deserialization() {
                     if let Err(e) = deserialize_file::<ResponseType>(&response_file) {
                         if let quick_xml::DeError::Custom(msg) = &e {
                             if msg == "No such file or directory (os error 2)" || msg == "IGNORED" {
-                                println!("Skipping test 'Response' {:?} due to unavailable file or unimplemented data type", test_case_dir);
+                                if (!quiet) {
+                                    println!("Skipping test 'Response' {:?} due to unavailable file or unimplemented data type", test_case_dir);
+                                }
                                 continue;
                             }
                         }

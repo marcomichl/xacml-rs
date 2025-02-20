@@ -298,7 +298,7 @@ pub struct VariableReferenceType {
 
 /// 5.25 Expression Substitution Group definition
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
-#[serde(untagged)]
+//#[serde(untagged)]
 pub enum ExpressionType {
     #[serde(rename = "Apply")]
     Apply(ApplyType),
@@ -541,7 +541,7 @@ pub struct AdviceExpressionType {
     #[serde(rename = "@AppliesTo")]
     applies_to: EffectType,
     #[serde(rename = "$value", skip_serializing_if = "Option::is_none")]
-    attribute_assignment: Option<Vec<AttributeAssignmentType>>
+    attribute_assignment: Option<Vec<AttributeAssignmentExpressionType>>
 }
 
 /// 5.41 AttributeAssignmentExpressionType definition

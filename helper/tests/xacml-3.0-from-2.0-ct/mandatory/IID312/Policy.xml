@@ -11,7 +11,7 @@
         This test in conjunction with IID311 demonstrates that the ordered-permit-overrides at the Rule level takes the first rule that matches.
     </Description>
     <Target/>
-    <Rule Effect="Deny" RuleId="urn:oasis:names:tc:xacml:2.0:conformance-test:IID009:rule1">
+    	<Rule Effect="Deny" RuleId="urn:oasis:names:tc:xacml:2.0:conformance-test:IID009:rule1">
         <Description>
             A subject whose name is J. Hibbert may not
             read Bart Simpson's medical record.  NOTAPPLICABLE
@@ -28,7 +28,7 @@
         </Target>
     </Rule>
     
-   	<!--  Order (position in this file) of this policy is different than in IID312 - this one comes first, so its Obligations should be seen in Response 
+   	<!-- Order (position in this file) of this policy is different than in IID312 - this one comes first, so its Obligations should be seen in Response  -->
     <Rule Effect="Permit" RuleId="urn:oasis:names:tc:xacml:2.0:conformance-test:IID312:rule5">
         <Description>
             A subject who is at least 5 years older than Bart
@@ -63,7 +63,7 @@
 	    </AdviceExpressions>
     </Rule> 
     
-    -->
+   
     
     
     <Rule Effect="Permit" RuleId="urn:oasis:names:tc:xacml:2.0:conformance-test:IID312:rule2">
@@ -84,13 +84,13 @@
             <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#integer">5</AttributeValue>
 		  </Apply>
         </Condition>
-    	<!--<ObligationExpressions>
+    	<ObligationExpressions>
 	        <ObligationExpression FulfillOn="Permit" ObligationId="urn:oasis:names:tc:xacml:2.0:conformance-test:IID312:obligation-1">
 	            <AttributeAssignmentExpression AttributeId="urn:oasis:names:tc:xacml:2.0:conformance-test:IID312:assignment1">
 	                <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">assignment1</AttributeValue>
 	            </AttributeAssignmentExpression>
 	        </ObligationExpression>
-        </ObligationExpressions>-->
+        </ObligationExpressions>
         <AdviceExpressions>
 	        <AdviceExpression AppliesTo="Permit" AdviceId="urn:oasis:names:tc:xacml:2.0:conformance-test:IID312:Advice-1">
 	            <AttributeAssignmentExpression AttributeId="urn:oasis:names:tc:xacml:2.0:conformance-test:IID312:assignment1">
@@ -100,7 +100,7 @@
 	    </AdviceExpressions>
     </Rule>
         
-
+	
     <Rule Effect="Deny" RuleId="urn:oasis:names:tc:xacml:2.0:conformance-test:IID312:rule3">
         <Description>
             A subject whose "bogus" attribute is "Zaphod Beedlebrox" may not
