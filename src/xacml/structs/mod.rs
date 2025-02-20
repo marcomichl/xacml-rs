@@ -1,9 +1,10 @@
 mod test_types;
 
 use core::str;
-use std::str::FromStr;
+use std::{fmt, str::FromStr};
 
-use serde::{Deserialize, Deserializer, Serialize};
+use quick_xml::{events::Event, Reader};
+use serde::{de::{MapAccess, Visitor}, Deserialize, Deserializer, Serialize};
 
 use super::enums::{combining_algorithms::{PolicyCombiningAlgorithms, RuleCombiningAlgorithms}, data_types::DataType, *};
 
@@ -103,9 +104,9 @@ pub struct MatchType {
     #[serde(rename = "AttributeValue")]
     attribute_value: AttributeValueType,
     #[serde(rename = "AttributeDesignator", skip_serializing_if = "Option::is_none")]
-    attribute_designator: Option<AttributeDesignator>,   // Either this or the attributeSelector must be present, not both and not none
+    attribute_designator: Option<AttributeDesignatorType>,   // Either this or the attributeSelector must be present, not both and not none
     #[serde(rename = "AttributeSelector", skip_serializing_if = "Option::is_none")]
-    attribute_selector: Option<AttributeSelector>
+    attribute_selector: Option<AttributeSelectorType>
 }
 
 /// 5.10 PolicySetIdReferenceType
@@ -181,15 +182,6 @@ pub struct PolicyType {
 pub struct DefaultsType {
     x_path_version: Option<Vec<String>>        // more specific URI type
 }
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub struct AttributeDesignator {
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub struct AttributeSelector {
-}
-
 
 /// 5.13 VersionMatchType
 /// Type for the version attribute of the policy set or policy
@@ -306,7 +298,7 @@ pub struct VariableReferenceType {
 
 /// 5.25 Expression Substitution Group definition
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
-//#[serde(untagged)]
+#[serde(untagged)]
 pub enum ExpressionType {
     #[serde(rename = "Apply")]
     Apply(ApplyType),
@@ -477,7 +469,7 @@ pub struct AssociatedAdviceType {
 /// Contains an obligation element
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct ObligationType {
-    #[serde(rename = "ObligationId")]
+    #[serde(rename = "@ObligationId")]
     obligation_id: String,      // More specific of URI type
     #[serde(rename = "AttributeAssignment", skip_serializing_if = "Option::is_none")]
     attribute_assignment: Option<Vec<AttributeAssignmentType>>
@@ -487,7 +479,7 @@ pub struct ObligationType {
 /// Containts an identifier for the advice and a set of attributes as supplemantal information
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct AdviceType {
-    #[serde(rename = "AdviceId")]
+    #[serde(rename = "@AdviceId")]
     advice_id: String,          // More specific of URI type
     #[serde(rename = "AttributeAssignment", skip_serializing_if = "Option::is_none")]
     attribute_assignment: Option<Vec<AttributeAssignmentType>>
@@ -498,8 +490,11 @@ pub struct AdviceType {
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 #[serde(rename = "AttributeAssignment")]
 pub struct AttributeAssignmentType {
+    // TODO: This incorporates the AttributeValueType, but is not yet implemented
+    //#[serde(flatten)]
+    //value: AttributeValueType,
     #[serde(rename = "$value")]
-    attribute: ExpressionType,
+    attribute: String,
     #[serde(rename = "@AttributeId")]
     attribute_id: String,       // More specific of URI type
     #[serde(rename = "@Category", skip_serializing_if = "Option::is_none")]
@@ -631,15 +626,10 @@ pub struct AttributesType {
 /// Optional, not that reasoned implemented
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct Content {
-    #[serde(rename = "AnyName", deserialize_with = "store_as_string")]
+    //#[serde(rename = "$value")]
+    // TODO: Did not yet find a way to deserialize arbitratory XML content
+    #[serde(skip)]
     any: String        // Any XML content
-}
-
-fn store_as_string<'de, D>(deserializer: D) -> Result<String, D::Error> 
-where D: Deserializer<'de>, 
-{
-    let x: String = Deserialize::deserialize(deserializer)?;
-    Ok(x)
 }
 
 /// 5.46 AttributeType

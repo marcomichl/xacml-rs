@@ -60,14 +60,13 @@ fn test_simple_policy() {
 fn test_single_file() {
     let base_path = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap())
         .join("helper/tests/xacml-3.0-from-2.0-ct/mandatory");
-    let test_case_path = base_path.join("IIF310_FIXED_NO_XPATH");
-    let test_file_path = test_case_path.join("Request.xml");
+    let test_case_path = base_path.join("IID312");
+    let test_file_path = test_case_path.join("Policy.xml");
 
-    let policy_object: RequestType = deserialize_file(&test_file_path).unwrap();
+    let policy_object: PolicySetOrPolicy = deserialize_file(&test_file_path).unwrap();
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-//#[serde(untagged)]
 enum PolicySetOrPolicy {
     #[serde(rename = "PolicySet")]
     PolicySet(PolicySetType),
@@ -136,7 +135,7 @@ fn test_xacml_deserialization() {
                     } else {
                         number_successful_tests += 1;
                     } 
-                    /* 
+                    
                     if let Err(e) = deserialize_file::<ResponseType>(&response_file) {
                         if let quick_xml::DeError::Custom(msg) = &e {
                             if msg == "No such file or directory (os error 2)" || msg == "IGNORED" {
@@ -150,7 +149,7 @@ fn test_xacml_deserialization() {
                     } else {
                         number_successful_tests += 1;
                     }
-                    */
+                    
                     if success {
                         successful_tests.push(test_case_dir.display().to_string());
                     } else {
