@@ -7,6 +7,7 @@ use std::fs;
 use std::path::PathBuf;
 use std::env;
 use serde::Deserialize;
+use crate::xacml::enums::combining_algorithms::PolicyCombiningAlgorithms;
 
 #[test]
 fn test_simple_policy() {
@@ -196,4 +197,29 @@ fn deserialize_file<T: for<'de> Deserialize<'de>>(path: &PathBuf) -> Result<T, q
             Err(e)
         }
     }
+}
+
+#[test]
+fn test_policy_set_builder() {
+    let policy_set_builder = PolicySetTypeBuilder::default();
+    let policy_set = policy_set_builder.xmlns("urn:oasis:names:tc:xacml:3.0:core:schema:wd-17")
+        .xmlns_xsi("http://www.w3.org/2001/XMLSchema-instance")
+        .policy_set_id("urn:oasis:names:tc:xacml:3.0:example:SimplePolicySet")
+        .version(
+            VersionType(String::from("1.0"))
+        )
+        .policy_combining_alg_id(PolicyCombiningAlgorithms::DenyOverrides)
+        .description("Medi Corp access control policy set")
+        .policy_issuer(
+            PolicyIssuerTypeBuilder::default()
+                .content(String::from("Medi Corp"))
+                .build().unwrap()
+        )
+        .target(
+            TargetTypeBuilder::default()
+                .build().unwrap()
+        )
+        .build().unwrap();
+    let string = to_string(&policy_set).unwrap();
+    print!("Policy Set Struct: \n \n {}\n\n", string);
 }
