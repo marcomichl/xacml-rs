@@ -1,12 +1,13 @@
-#![allow(unused_imports)] 
+#![allow(unused_imports, unused_variables)] 
+#![allow(dead_code)]
 // Disable unused import warnings for tests
 #[cfg(test)]
-use super::*;
+use super::{PolicyType, RequestType, ResponseType, PolicySetType, PolicySetTypeBuilder, PolicyIssuerTypeBuilder, TargetTypeBuilder, VersionType};
 use quick_xml::{de::from_str, se::to_string};
 use std::fs;
 use std::path::PathBuf;
 use std::env;
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use crate::xacml::enums::combining_algorithms::PolicyCombiningAlgorithms;
 
 #[test]
@@ -70,9 +71,9 @@ fn test_single_file() {
 #[derive(Debug, Deserialize, Serialize)]
 enum PolicySetOrPolicy {
     #[serde(rename = "PolicySet")]
-    PolicySet(PolicySetType),
+    PolicySet(super::PolicySetType),
     #[serde(rename = "Policy")]
-    Policy(PolicyType),
+    Policy(super::PolicyType),
 }
 
 #[test]
@@ -113,7 +114,7 @@ fn test_xacml_deserialization() {
                     if let Err(e) = deserialize_file::<PolicySetOrPolicy>(&policy_file) {
                         if let quick_xml::DeError::Custom(msg) = &e {
                             if msg == "IGNORED" {
-                                if (!quiet) {
+                                if !quiet {
                                     println!("Skipping test {:?} due to unimplemented data type", test_case_dir);
                                 }
                                 continue;
@@ -130,7 +131,7 @@ fn test_xacml_deserialization() {
                     if let Err(e) = deserialize_file::<RequestType>(&request_file) {
                         if let quick_xml::DeError::Custom(msg) = &e {
                             if msg == "No such file or directory (os error 2)" || msg == "IGNORED" {
-                                if (!quiet) {
+                                if !quiet {
                                     println!("Skipping test 'Request' {:?} due to unavailable file or unimplemented data type", test_case_dir);
                                 }
                                 continue;
@@ -146,7 +147,7 @@ fn test_xacml_deserialization() {
                     if let Err(e) = deserialize_file::<ResponseType>(&response_file) {
                         if let quick_xml::DeError::Custom(msg) = &e {
                             if msg == "No such file or directory (os error 2)" || msg == "IGNORED" {
-                                if (!quiet) {
+                                if !quiet {
                                     println!("Skipping test 'Response' {:?} due to unavailable file or unimplemented data type", test_case_dir);
                                 }
                                 continue;
