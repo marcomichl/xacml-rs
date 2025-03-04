@@ -224,3 +224,10 @@ fn test_policy_set_builder() {
     let string = to_string(&policy_set).unwrap();
     print!("Policy Set Struct: \n \n {}\n\n", string);
 }
+
+#[test]
+fn test_deserialize_test_file(){
+    let str = r#"<Policy PolicyId="urn:sl-xacml:policy:01" Version="0.1" RuleCombiningAlgId="urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-overrides"><Description>Policy 01 for the sl-xacml paper</Description><Target/><Rule RuleId="urn:sl-xacml:rule:01" Effect="Permit"><Description>Rule 01 for the sl-xacml paper</Description><Target><AnyOf><AllOf><Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal"><AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">role</AttributeValue></Match></AllOf></AnyOf></Target></Rule></Policy>"#;
+    let policy: PolicyType = from_str(str).unwrap();
+    print!("Policy Struct: \n \n {:?}\n\n", policy);
+}

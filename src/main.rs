@@ -1,9 +1,10 @@
 mod xacml;
 mod utils;
+mod create_files;
 
 use std::env;
 use utils::{parse_xml_file, serialize_to_xml_file};
-use xacml::structs::RequestType;
+use xacml::structs::*;
 
 fn main() {
  
@@ -23,7 +24,16 @@ fn main() {
             }
             let policy = &args[2];
             let context_id = &args[3];
-            decide_requets(policy, context_id);
+            decide_request(policy, context_id);
+        }
+        "evaluatePolicy" => {
+            if args.len() != 4 {
+                eprintln!("Usage: {} evaluate <policy> <context>", args[0]);
+                return;
+            }
+            let policy = &args[2];
+            let context_id = &args[3];
+            evaluate_policy(policy, context_id);
         }
         _ => {
             eprintln!("Unknown command: {}", args[1]);
@@ -31,12 +41,14 @@ fn main() {
     }
 }
 
-    fn evaluate_policy(policy: &str, context: &str) {
+    fn evaluate_policy(policy_file: &str, context: &str) {
         // Placeholder for actual policy evaluation logic
-        println!("Evaluating policy: {} with context: {}", policy, context);
+        let policy = parse_xml_file::<PolicyType>(policy_file)
+        .expect("Failed to parse policy file");
+        
     }
 
-    fn decide_requets(request_file: &str, context_id: &str) {
+    fn decide_request(request_file: &str, context_id: &str) {
         let request = parse_xml_file::<RequestType>(request_file)
             .expect("Failed to parse request file");
     }

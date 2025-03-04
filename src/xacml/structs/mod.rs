@@ -3,7 +3,8 @@ mod test_types;
 use core::str;
 use std::str::FromStr;
 
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::ser::SerializeSeq;
 
 use derive_builder::Builder;
 
@@ -121,7 +122,7 @@ pub struct AllOfType {
 /// 5.9 Match element
 /// Shall contain a condition that must be fulfilled by the context to be applicable
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
+#[builder(pattern = "owned", setter(into, strip_option))]
 pub struct MatchType {
     #[serde(rename = "@MatchId")]
     match_id: String,                        // More specific of URI type
@@ -173,7 +174,7 @@ pub struct PolicyIdReferenceType {
 /// 5.14 Policy element
 /// Describes a policy as smallest unit useable by a PDP
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
+#[builder(pattern = "owned", setter(into, strip_option))]
 #[serde(rename = "Policy")]
 pub struct PolicyType {
     #[serde(rename = "@xmlns", skip_serializing_if = "Option::is_none")]
@@ -206,7 +207,7 @@ pub struct PolicyType {
     #[serde(rename = "RuleCombinerParameters", skip_serializing_if = "Option::is_none")]
     #[builder(default)]
     rule_combiner_parameters: Option<Vec<String>>,  // own type?
-    #[serde(rename = "Target")]
+    #[serde(rename = "Target", default, serialize_with = "serialize_target")]
     target: Vec<TargetType>,
     #[serde(rename = "VariableDefinition", skip_serializing_if = "Option::is_none")]
     #[builder(default)]
@@ -220,6 +221,17 @@ pub struct PolicyType {
     #[builder(default)]
     advice_expressions: Option<Vec<AdviceExpressionsType>>,
     
+}
+
+fn serialize_target<S>(targets: &Vec<TargetType>, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    if targets.is_empty() {
+        serializer.serialize_str("") 
+    } else {
+        targets.serialize(serializer)
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Builder)]
@@ -242,7 +254,7 @@ pub struct VersionMatchType{
 /// Type for the version attribute of the policy set or policy
 /// Consists of a string, that is restricted to numbers separated by dots
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
-pub struct VersionType (String); //Newtype wrapper as this is a simple string restricted to numbers separated by dots, should be implemented later
+pub struct VersionType (pub String); //Newtype wrapper as this is a simple string restricted to numbers separated by dots, should be implemented later
 
 /// 5.16 CombinerParameterType
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
@@ -302,7 +314,7 @@ pub struct PolicySetCombinerParametersType {
 /// 5.21 RuleType
 /// Defines a rule in a policy
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
+#[builder(pattern = "owned", setter(into, strip_option))]
 pub struct RuleType {
     #[serde(rename = "@RuleId")]
     rule_id: String,
@@ -450,7 +462,7 @@ pub struct AttributeSelectorType {
 /// Contains a literal attribute value
 /// Is kind of a special case as the data type of the value is described by the DataType attribute
 #[derive(Serialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
+#[builder(pattern = "owned", setter(into, strip_option))]
 pub struct AttributeValueType {
     #[serde(rename = "@DataType")]
     data_type: DataType,          // More specific of URI type
