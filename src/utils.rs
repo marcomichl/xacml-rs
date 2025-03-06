@@ -28,8 +28,10 @@ where
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum XacmlErrorType{
     IoError,
+    FormatError,
     DeserializeError,
     SerializeError,
+    NotImplemented,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
