@@ -4,7 +4,6 @@ use core::str;
 use std::str::FromStr;
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde::ser::SerializeSeq;
 
 use derive_builder::Builder;
 

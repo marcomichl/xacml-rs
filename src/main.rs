@@ -3,6 +3,7 @@ mod utils;
 mod create_files;
 
 use std::env;
+#[allow(unused_imports)]
 use utils::{parse_xml_file, serialize_to_xml_file};
 use xacml::structs::*;
 

@@ -13,6 +13,7 @@ where
         .map_err( |_| XacmlError::new(XacmlErrorType::DeserializeError, format!("Error deserializing string: {}", content)))
 }
 
+#[allow(unused)]
 pub fn serialize_to_xml_file<T>(data: &T, path: &str) -> Result<(), XacmlError>
 where
     T: Serialize + Debug,
