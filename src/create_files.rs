@@ -16,14 +16,14 @@ fn create_policy(){
         .policy_id("urn:sl-xacml:policy:01")
         .version(VersionType("0.1".to_string()))
         .rule_combining_alg_id(RuleCombiningAlgorithms::DenyOverrides)
-        .description("Policy 01 for the sl-xacml paper")
+        .description("Example policy")
         .target(Vec::<TargetType>::new())
         .rule(
             vec![
                     RuleTypeBuilder::default()
                     .rule_id("urn:sl-xacml:rule:01")
                     .effect(EffectType::Permit)
-                    .description("Rule 01 for the sl-xacml paper")
+                    .description("First rule of the example policy")
                     .target(
                         TargetTypeBuilder::default()
                             .any_of(
@@ -38,7 +38,14 @@ fn create_policy(){
                                                                 .match_id("urn:oasis:names:tc:xacml:1.0:function:string-equal")
                                                                 .attribute_value(AttributeValueTypeBuilder::default()
                                                                     .data_type(DataType::String)
-                                                                    .value(Value::String("role".to_string()))
+                                                                    .value(Value::String("employee".to_string()))
+                                                                    .build().unwrap()
+                                                                )
+                                                                .attribute_designator(AttributeDesignatorTypeBuilder::default()
+                                                                    .category("urn:sl-xacml:subject-category:access-subject")
+                                                                    .attribute_id("urn:sl-xacml:attribute:role")
+                                                                    .data_type(DataType::String)
+                                                                    .must_be_present(false)
                                                                     .build().unwrap()
                                                                 )
                                                                 .build().unwrap()
@@ -55,5 +62,4 @@ fn create_policy(){
         )
         .build().unwrap();
     serialize_to_xml_file(&policy, "policy01.xml").unwrap();
-
 }

@@ -1,5 +1,6 @@
 mod test_types;
-pub mod implementation;
+mod attributes_type;
+mod match_type;
 
 use core::str;
 use std::str::FromStr;
@@ -8,6 +9,8 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use derive_builder::Builder;
 
+pub use match_type::*;
+pub use attributes_type::*;
 use super::enums::{combining_algorithms::{PolicyCombiningAlgorithms, RuleCombiningAlgorithms}, data_types::DataType, *};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Builder)]
@@ -117,23 +120,6 @@ pub struct AnyOfType {
 pub struct AllOfType {
     #[serde(rename = "Match")]
     _match: Vec<MatchType>                           // One or many, all of which must match the context to be applicable
-}
-
-/// 5.9 Match element
-/// Shall contain a condition that must be fulfilled by the context to be applicable
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Builder)]
-#[builder(pattern = "owned", setter(into, strip_option))]
-pub struct MatchType {
-    #[serde(rename = "@MatchId")]
-    match_id: String,                        // More specific of URI type
-    #[serde(rename = "AttributeValue")]
-    attribute_value: AttributeValueType,
-    #[serde(rename = "AttributeDesignator", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    attribute_designator: Option<AttributeDesignatorType>,   // Either this or the attributeSelector must be present, not both and not none
-    #[serde(rename = "AttributeSelector", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    attribute_selector: Option<AttributeSelectorType>
 }
 
 /// 5.10 PolicySetIdReferenceType
@@ -414,7 +400,7 @@ pub struct ApplyType {
 /// 5.28 FunctionType definition
 /// Used to name a function in the ApplyType
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
+#[builder(pattern = "owned", setter(into, strip_option))]
 pub struct FunctionType {
     #[serde(rename = "@FunctionId")]
     function_id: function::Function,   
@@ -425,7 +411,7 @@ pub struct FunctionType {
 /// The attribute id must match the id of an attribute in the request context
 /// In case it is not contained, an error is raised according to the MustBePresent attribute
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
+#[builder(pattern = "owned", setter(into, strip_option))]
 pub struct AttributeDesignatorType{
     #[serde(rename = "@AttributeId")]
     attribute_id: String,       // More specific of URI type
@@ -443,7 +429,7 @@ pub struct AttributeDesignatorType{
 /// 5.30 AttributeSelectorType definition
 /// Used to retrieve a bag of unnamed and uncategorized attributes from the request context
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
+#[builder(pattern = "owned", setter(into, strip_option))]
 pub struct AttributeSelectorType {
     #[serde(rename = "@Category")]
     category: String,           // More specific of URI type
@@ -709,23 +695,7 @@ pub struct RequestDefaultsType {
     x_path_version: String,     // More specific of URI type
 }
 
-/// 5.44 AttributesType
-/// Contains a set of attributes
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
-pub struct AttributesType {
-    #[serde(rename = "@Category")]
-    category: String,           //Specifies for what type of entity this attributes are defined
-    #[serde(rename = "@xml:id", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    xml_id: Option<String>,     // Unique identifier for the attributes
-    #[serde(rename = "Content", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    content: Option<Content>,        // Type 5.45, defined as sequence with 0 or 1 occurance
-    #[serde(rename = "Attribute", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    attribute: Option<Vec<AttributeType>>    // Type 5.46, defined as sequence with ANY number
-}
+
 
 /// 5.45 ContentType
 /// Placeholder for additional attributes, typically content of the resource

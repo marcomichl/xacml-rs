@@ -1,32 +1,22 @@
 use crate::utils::{XacmlError, XacmlErrorType};
 use super::*;
 
-use super::MatchType;
-
-
-impl MatchType{
-    fn match_request(&self, request: &RequestType) -> Result<bool, XacmlError> {
-        let attribute = &self.attribute_value;
-        if self.attribute_designator.is_some() {
-            let attribute_designator = self.attribute_designator.as_ref().unwrap();
-            for attributes in &request.attributes {
-                let result = attributes.get_attribute_value_by_designator(attribute_designator);
-                if result.is_ok() {
-                    return Ok(result.unwrap() == attribute);
-                }
-            }
-        }
-        if self.attribute_selector.is_some() {
-            let attribute_selector = self.attribute_selector.as_ref().unwrap();
-            for attributes in &request.attributes {
-                let result = attributes.get_attribute_value_by_selector(attribute_selector);
-                if result.is_ok() {
-                    return Ok(result.unwrap() == attribute);
-                }
-            }
-        }
-        Err(XacmlError::new(XacmlErrorType::FormatError, "MatchType does not contain a valid attribute designator or selector".to_string()))
-    }
+/// 5.44 AttributesType
+/// Contains a set of attributes
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
+#[builder(pattern = "owned", setter(strip_option))]
+pub struct AttributesType {
+    #[serde(rename = "@Category")]
+    category: String,           //Specifies for what type of entity this attributes are defined
+    #[serde(rename = "@xml:id", skip_serializing_if = "Option::is_none")]
+    #[builder(default)]
+    xml_id: Option<String>,     // Unique identifier for the attributes
+    #[serde(rename = "Content", skip_serializing_if = "Option::is_none")]
+    #[builder(default)]
+    content: Option<Content>,        // Type 5.45, defined as sequence with 0 or 1 occurance
+    #[serde(rename = "Attribute", skip_serializing_if = "Option::is_none")]
+    #[builder(default)]
+    attribute: Option<Vec<AttributeType>>    // Type 5.46, defined as sequence with ANY number
 }
 
 
