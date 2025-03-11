@@ -1,6 +1,15 @@
 mod test_types;
 mod attributes_type;
 mod match_type;
+mod target_type;
+mod any_of_type;
+mod all_of_type;
+mod policy_type;
+mod response_type;
+mod result_type;
+mod status_type;
+mod status_code_type;
+mod status_message_type;
 
 use core::str;
 use std::str::FromStr;
@@ -9,8 +18,18 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use derive_builder::Builder;
 
+pub use any_of_type::*;
 pub use match_type::*;
 pub use attributes_type::*;
+pub use target_type::*;
+pub use all_of_type::*;
+pub use policy_type::*; 
+pub use response_type::*;
+pub use result_type::*;
+pub use status_type::*;
+pub use status_code_type::*;
+pub use status_message_type::*;
+
 use super::enums::{combining_algorithms::{PolicyCombiningAlgorithms, RuleCombiningAlgorithms}, data_types::DataType, *};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Builder)]
@@ -93,34 +112,10 @@ pub struct PolicyIssuerType {
 }
 
 
-/// Shall appear in the policy set or the policy elements, may be contained in a rule element
-/// Shall contain a conjunctive sequence of <AnyOf> elements, to be applicable one of these has to match the decision request.
-/// Each AnyOf element contains a disjunctive AllOf element, that all have to match the decision request.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
-pub struct TargetType {
-    #[serde(rename = "AnyOf", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    any_of: Option<Vec<AnyOfType>>                  // Data type for elements, of which one must match the context to be applicable; if empty, the target is always applicable; might be changed to a simple vec, that can also be of length 0
-}
 
-/// 5.7 AnyOf element
-/// Shall contain a disjunctive sequence of <AllOf> elements, to be applicable all of these have to match the decision request.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
-pub struct AnyOfType {
-    #[serde(rename = "AllOf")]
-    all_of: Vec<AllOfType>                  // Data type for elements, of which all must match the context to be applicable; if empty, the anyOf is always applicable; might be changed to a simple vec, that can also be of length 0
-}
 
-/// 5.8 AllOf element
-/// Shall contain a conjunctive sequence of <Match> elements, to be applicable all of these have to match the decision request.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
-pub struct AllOfType {
-    #[serde(rename = "Match")]
-    _match: Vec<MatchType>                           // One or many, all of which must match the context to be applicable
-}
+
+
 
 /// 5.10 PolicySetIdReferenceType
 /// Reference a PolicySet by the ID
@@ -157,68 +152,7 @@ pub struct PolicyIdReferenceType {
     id: IdReferenceType
 }
 
-/// 5.14 Policy element
-/// Describes a policy as smallest unit useable by a PDP
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Builder)]
-#[builder(pattern = "owned", setter(into, strip_option))]
-#[serde(rename = "Policy")]
-pub struct PolicyType {
-    #[serde(rename = "@xmlns", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    xmlns: Option<String>,
-    #[serde(rename = "@xmlns:xsi", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    xmlns_xsi: Option<String>,
-    #[serde(rename = "@PolicyId")]
-    policy_id: String,                          // More specific of URI type
-    #[serde(rename = "@Version")]
-    version: VersionType,
-    #[serde(rename = "@RuleCombiningAlgId")]
-    rule_combining_alg_id: RuleCombiningAlgorithms,              // Combining algorithm, as of now string, might later be an enum
-    #[serde(rename = "@MaxDelegationDepth", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    max_delegation_depth: Option<i32>,
-    #[serde(rename = "Description", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    description: Option<String>,                
-    #[serde(rename = "PolicyIssuer", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    policy_issuer: Option<PolicyIssuerType>,
-    #[serde(rename = "PolicyDefaults", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    policy_defaults: Option<DefaultsType>,
-    #[serde(rename = "CombinerParameters", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    combiner_parameters: Option<Vec<CombinerParametersType>>,       // own type?
-    #[serde(rename = "RuleCombinerParameters", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    rule_combiner_parameters: Option<Vec<String>>,  // own type?
-    #[serde(rename = "Target", default, serialize_with = "serialize_target")]
-    target: Vec<TargetType>,
-    #[serde(rename = "VariableDefinition", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    variable_definition: Option<Vec<String>>,       // own type?
-    #[serde(rename = "Rule")]
-    rule: Vec<RuleType>,
-    #[serde(rename = "ObligationExpressions", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    obligation_expressions: Option<Vec<ObligationExpressionsType>>,
-    #[serde(rename = "AdvideExpressions", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    advice_expressions: Option<Vec<AdviceExpressionsType>>,
-    
-}
 
-fn serialize_target<S>(targets: &Vec<TargetType>, serializer: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    if targets.is_empty() {
-        serializer.serialize_str("") 
-    } else {
-        targets.serialize(serializer)
-    }
-}
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Builder)]
 #[builder(pattern = "owned", setter(strip_option))]
@@ -729,38 +663,7 @@ fn default_false() -> bool {
     false
 }   
 
-/// 5.47 ResponseType
-/// Standard return type for a decision request
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
-pub struct ResponseType {
-    #[serde(rename = "Result")]
-    result: Vec<ResultType>
-}
 
-/// 5.48 ResultType
-/// Contains the result of a decision request
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
-pub struct ResultType {
-    #[serde(rename = "Decision")]
-    decision: DecisionType,
-    #[serde(rename = "Status", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    status: Option<StatusType>,
-    #[serde(rename = "Obligations", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    obligations: Option<ObligationsType>,
-    #[serde(rename = "AssociatedAdvice", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    associated_advice: Option<AssociatedAdviceType>,
-    #[serde(rename = "Attributes", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    attributes: Option<Vec<AttributesType>>,
-    #[serde(rename = "PolicyIdentifierList", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    policy_identifier_list: Option<PolicyIdentifierListType> // If set the return_policy_id_list true, this list contains policies that are fully-applicable
-}
 
 /// 5.49 PolicyIdentifierListType
 /// Contains a list of policy identifiers
@@ -786,41 +689,10 @@ pub enum DecisionType {
     NotApplicable
 }
 
-/// 5.54 StatusType
-/// Contains the status of a decision request
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
-pub struct StatusType {
-    #[serde(rename = "StatusCode")]
-    status_code: StatusCodeType,
-    #[serde(rename = "StatusMessage", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    status_message: Option<StatusMessageType>,
-    #[serde(rename = "StatusDetail", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    status_detail: Option<StatusDetailType>
-}
 
-/// 5.55 StatusCodeType
-/// Contains the status code of a decision request
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
-pub struct StatusCodeType {
-    #[serde(rename = "@Value")]
-    value: String,          // see Annex B.8 for values / implementation as enum 
-    #[serde(rename = "StatusCode", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    status_code: Option<Vec<StatusCodeType>>     //Minor codes
-}
 
-/// 5.56 StatusMessageType
-/// Contains the status message of a decision request
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
-pub struct StatusMessageType {
-    #[serde(rename = "$value")]
-    value: String
-}
+
+
 
 /// 5.57 StatusDetailType
 /// Contains the status detail of a decision request

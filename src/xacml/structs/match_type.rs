@@ -19,7 +19,7 @@ pub struct MatchType {
 }
 
 impl MatchType{
-    fn match_request(&self, request: &RequestType) -> Result<bool, XacmlError> {
+    pub fn match_request(&self, request: &RequestType) -> Result<bool, XacmlError> {
         let attribute = &self.attribute_value;
         if self.attribute_designator.is_some() {
             let attribute_designator = self.attribute_designator.as_ref().unwrap();

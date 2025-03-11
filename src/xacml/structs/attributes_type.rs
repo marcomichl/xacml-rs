@@ -19,7 +19,6 @@ pub struct AttributesType {
     attribute: Option<Vec<AttributeType>>    // Type 5.46, defined as sequence with ANY number
 }
 
-
 impl AttributesType{
     pub fn get_attribute_value_by_designator(&self, designator: &AttributeDesignatorType) -> Result<&AttributeValueType, XacmlError> {
         if self.category != designator.category {
