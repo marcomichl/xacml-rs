@@ -12,6 +12,10 @@ pub fn decide_request(request: RequestType, context: &str) -> Result<ResponseTyp
                 vec![ResultTypeBuilder::default()
                     .decision(DecisionType::NotApplicable)
                     .status(StatusTypeBuilder::default()
+                            .status_code(StatusCodeTypeBuilder::default()
+                            .value("urn:oasis:names:tc:xacml:1.0:status:ok")
+                            .build()
+                            .unwrap())
                         .status_message(StatusMessageType::new("Policy is not applicable".to_string()))
                         .build()
                         .unwrap())
@@ -24,6 +28,13 @@ pub fn decide_request(request: RequestType, context: &str) -> Result<ResponseTyp
     }
     // First verify that the target of the policy matches the request
     
-
-    ResponseTypeBuilder::default().build().map_err(|e| XacmlError::new(XacmlErrorType::FormatError, format!("Error building response: {}", e)))
+    ResponseTypeBuilder::default()
+    .result(
+        vec![ResultTypeBuilder::default()
+            .decision(DecisionType::Permit)
+            .build()
+            .unwrap()
+        ]
+    )
+    .build().map_err(|e| XacmlError::new(XacmlErrorType::FormatError, format!("Error building response: {}", e)))
 }

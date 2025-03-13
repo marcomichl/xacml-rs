@@ -11,6 +11,7 @@ use crate::xacml::enums::{combining_algorithms::*, data_types::*};
 
 
 #[test]
+#[ignore]
 fn create_policy(){
     let policy: PolicyType = PolicyTypeBuilder::default()
         .policy_id("urn:sl-xacml:policy:01")
@@ -62,4 +63,34 @@ fn create_policy(){
         )
         .build().unwrap();
     serialize_to_xml_file(&policy, "policy01.xml").unwrap();
+}
+
+#[test]
+fn test_evaluate_simple_policy(){
+    let request = RequestTypeBuilder::default()
+        .return_policy_id_list(false)
+        .combined_decision(false)
+        .attributes(
+            vec![
+                AttributesTypeBuilder::default()
+                    .category("urn:sl-xacml:subject-category:access-subject")
+                    .attribute(
+                        vec![
+                            AttributeTypeBuilder::default()
+                                .attribute_id("urn:sl-xacml:attribute:role")
+                                .include_in_result(false)
+                                .attribute_value(vec![
+                                    AttributeValueTypeBuilder::default()
+                                        .data_type(DataType::String)
+                                        .value(Value::String("employee".to_string()))
+                                        .build().unwrap()
+                                    ])
+                                .build().unwrap()
+                        ])
+                    .build().unwrap()
+            ])
+        .multi_requests(UnimplementedField(None))
+        .build().unwrap();
+    let response = pdp::decide_request(request, "policy01.xml").unwrap();
+    println!("{:?}", response);
 }

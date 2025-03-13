@@ -10,6 +10,8 @@ mod result_type;
 mod status_type;
 mod status_code_type;
 mod status_message_type;
+mod request_type;
+mod attribute_type;
 
 use core::str;
 use std::str::FromStr;
@@ -29,6 +31,8 @@ pub use result_type::*;
 pub use status_type::*;
 pub use status_code_type::*;
 pub use status_message_type::*;
+pub use request_type::*;
+pub use attribute_type::*;
 
 use super::enums::{combining_algorithms::{PolicyCombiningAlgorithms, RuleCombiningAlgorithms}, data_types::DataType, *};
 
@@ -578,46 +582,7 @@ pub struct AttributeAssignmentExpressionType {
     expression: Vec<ExpressionType>
 }
 
-///5.42 RequestType
-/// Contains the request for a decision
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
-pub struct RequestType {
-    #[serde(rename = "@ReturnPolicyIdList")]
-    return_policy_id_list: bool,
-    #[serde(rename = "@CombinedDecision")]
-    combined_decision: bool,
-    #[serde(rename = "RequestDefaults", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    request_defaults: Option<RequestDefaultsType>,
-    #[serde(rename = "Attributes")]
-    attributes: Vec<AttributesType>,
-    #[serde(rename = "MultiRequests", skip_serializing_if = "UnimplementedField::is_none")]
-    multi_requests: UnimplementedField // Is not yet implemented and optional, will fail if present
-}
 
-#[derive(Serialize, PartialEq, Eq, Debug)]
-struct UnimplementedField(Option<String>);
-impl<'de> Deserialize<'de> for UnimplementedField {
-    fn deserialize<D>(deserializer: D) -> Result<UnimplementedField, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let x: Option<String> = Deserialize::deserialize(deserializer)?;
-        if x.is_some() {
-            Err(serde::de::Error::custom(format!("Field must not be present: {}", x.unwrap())))
-        }
-        else {
-            Ok(Self(None))
-        }
-    
-    }
-}
-impl UnimplementedField {
-    fn is_none(&self) -> bool {
-        self.0.is_none()
-    }
-}
 
 /// 5.43 RequestDefaultsType
 /// Contains the XPath Version for the request
@@ -643,25 +608,7 @@ pub struct Content {
     any: String        // Any XML content
 }
 
-/// 5.46 AttributeType
-/// Contains a single attribute metadata and value
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
-pub struct AttributeType {
-    #[serde(rename = "@AttributeId")]
-    attribute_id: String,       // Pre-defined URIs in the Annex B, but contain only commonly used; might be implemented as enum
-    #[serde(rename = "@IncludeInResult", default = "default_false")]
-    include_in_result: bool,
-    #[serde(rename = "@Issuer", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    issuer: Option<String>,    
-    #[serde(rename = "AttributeValue")]
-    attribute_value: Vec<AttributeValueType>
-}
 
-fn default_false() -> bool {
-    false
-}   
 
 
 

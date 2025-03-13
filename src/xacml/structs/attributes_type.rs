@@ -4,7 +4,7 @@ use super::*;
 /// 5.44 AttributesType
 /// Contains a set of attributes
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
+#[builder(pattern = "owned", setter(into, strip_option))]
 pub struct AttributesType {
     #[serde(rename = "@Category")]
     category: String,           //Specifies for what type of entity this attributes are defined
