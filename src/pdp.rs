@@ -28,13 +28,5 @@ pub fn decide_request(request: RequestType, context: &str) -> Result<ResponseTyp
     }
     // First verify that the target of the policy matches the request
     
-    ResponseTypeBuilder::default()
-    .result(
-        vec![ResultTypeBuilder::default()
-            .decision(DecisionType::Permit)
-            .build()
-            .unwrap()
-        ]
-    )
-    .build().map_err(|e| XacmlError::new(XacmlErrorType::FormatError, format!("Error building response: {}", e)))
+    Ok(ResponseType::get_permit_response()?)
 }

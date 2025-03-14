@@ -1,5 +1,6 @@
-use std::{fmt::{self, Display, Formatter, Debug}, fs};
+use std::{any::Any, fmt::{self, Debug, Display, Formatter}, fs};
 
+use derive_builder::UninitializedFieldError;
 use quick_xml::{de::from_str, se::to_string};
 use serde::{Deserialize, Serialize};
 
@@ -32,6 +33,8 @@ pub enum XacmlErrorType{
     DeserializeError,
     SerializeError,
     NotImplemented,
+    BuildError,
+    GeneralError,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -48,6 +51,21 @@ impl XacmlError {
         }
     }
 }
+
+
+impl<E> From<E> for XacmlError 
+where
+    E: std::error::Error + 'static,
+{
+    fn from(e: E) -> Self {
+        let err_any = &e as &dyn Any; // Cast to `Any` for type checking
+        if err_any.is::<UninitializedFieldError>() {
+            return XacmlError::new(XacmlErrorType::BuildError, format!("Error! Uninitialized Field: {:?}", e));
+        }
+        XacmlError::new(XacmlErrorType::GeneralError, format!("Error: {}", e.to_string()))
+    }
+}
+
 
 impl Display for XacmlError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {

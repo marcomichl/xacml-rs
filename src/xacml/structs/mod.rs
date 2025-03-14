@@ -12,6 +12,7 @@ mod status_code_type;
 mod status_message_type;
 mod request_type;
 mod attribute_type;
+mod rule_type;
 
 use core::str;
 use std::str::FromStr;
@@ -33,6 +34,7 @@ pub use status_code_type::*;
 pub use status_message_type::*;
 pub use request_type::*;
 pub use attribute_type::*;
+pub use rule_type::*;
 
 use super::enums::{combining_algorithms::{PolicyCombiningAlgorithms, RuleCombiningAlgorithms}, data_types::DataType, *};
 
@@ -235,31 +237,7 @@ pub struct PolicySetCombinerParametersType {
     policy_set_id_ref: String           // More specific of URI type
 }
 
-/// 5.21 RuleType
-/// Defines a rule in a policy
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(into, strip_option))]
-pub struct RuleType {
-    #[serde(rename = "@RuleId")]
-    rule_id: String,
-    #[serde(rename = "@Effect")]
-    effect: EffectType,
-    #[serde(rename = "Description", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    description: Option<String>,
-    #[serde(rename = "Target", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    target: Option<TargetType>,
-    #[serde(rename = "Condition", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    condition: Option<ConditionType>,
-    #[serde(rename = "ObligationExpressions", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    obligation_expressions: Option<ObligationExpressionsType>,
-    #[serde(rename = "AdviceExpressions", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    advice_expressions: Option<AdviceExpressionsType>
-}
+
 
 
 /// 5.22 EffectType
