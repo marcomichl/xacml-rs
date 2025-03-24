@@ -62,7 +62,7 @@ fn test_simple_policy() {
 fn test_single_file() {
     let base_path = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap())
         .join("helper/tests/xacml-3.0-from-2.0-ct/mandatory");
-    let test_case_path = base_path.join("IID312");
+    let test_case_path = base_path.join("IIC170");
     let test_file_path = test_case_path.join("Policy.xml");
 
     let policy_object: PolicySetOrPolicy = deserialize_file(&test_file_path).unwrap();

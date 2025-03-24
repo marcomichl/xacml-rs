@@ -31,6 +31,9 @@ pub struct RuleType {
 impl RuleType {
     /// 7.11 Rule Evaluation
     pub (crate) fn evaluate_rule(&self, request: &RequestType) -> Result<DecisionType, XacmlError> {
+        // Rule has to evaluate the target and the condition to decide if the effect applies
+        
+
         return Err(XacmlError::new(XacmlErrorType::NotImplemented, "Rule evaluation not implemented".to_string()));
     }
 }

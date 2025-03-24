@@ -35,6 +35,7 @@ pub enum XacmlErrorType{
     NotImplemented,
     BuildError,
     GeneralError,
+    ProcessingError,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

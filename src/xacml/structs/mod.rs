@@ -13,6 +13,12 @@ mod status_message_type;
 mod request_type;
 mod attribute_type;
 mod rule_type;
+mod condition_type;
+mod expression_type;
+mod apply_type;
+mod function_type;
+mod function_implementation;
+mod attribute_value_type;
 
 use core::str;
 use std::str::FromStr;
@@ -20,6 +26,8 @@ use std::str::FromStr;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use derive_builder::Builder;
+
+use crate::utils::*;
 
 pub use any_of_type::*;
 pub use match_type::*;
@@ -35,6 +43,12 @@ pub use status_message_type::*;
 pub use request_type::*;
 pub use attribute_type::*;
 pub use rule_type::*;
+pub use condition_type::*;
+pub use expression_type::*;
+pub use apply_type::*;
+pub use function_type::*;
+pub use attribute_value_type::*;
+
 
 use super::enums::{combining_algorithms::{PolicyCombiningAlgorithms, RuleCombiningAlgorithms}, data_types::DataType, *};
 
@@ -269,58 +283,13 @@ pub struct VariableReferenceType {
     variable_id: String
 }
 
-/// 5.25 Expression Substitution Group definition
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
-//#[serde(untagged)]
-pub enum ExpressionType {
-    #[serde(rename = "Apply")]
-    Apply(ApplyType),
-    #[serde(rename = "AttributeDesignator")]
-    AttributeDesignator(AttributeDesignatorType),
-    #[serde(rename = "AttributeSelector")]
-    AttributeSelector(AttributeSelectorType),
-    #[serde(rename = "VariableReference")]
-    VariableReference(VariableReferenceType),
-    #[serde(rename = "Function")]
-    Function(FunctionType),
-    #[serde(rename = "AttributeValue")]
-    AttributeValue(AttributeValueType)
-}
 
-/// 5.26 ConditionType definition
-/// Boolean function over attributes or functions of attributes
-/// Not clear if a vector is correct, as a xs:sequence is defined, but description says one expression
-/// Might also be flattened?
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
-pub struct ConditionType {
-    #[serde(rename = "$value")]
-    expression: Vec<ExpressionType>
-}
 
-/// 5.27 ApplyType definition
-/// Describes the application of a function to its arguments
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
-pub struct ApplyType {
-    #[serde(rename = "@FunctionId")]
-    function_id: String,        // More specific of URI type
-    #[serde(rename = "@Description", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    description: Option<String>,
-    #[serde(rename = "$value",skip_serializing_if = "Option::is_none")]
-    #[builder(default)] 
-    expression: Option<Vec<ExpressionType>>
-}
 
-/// 5.28 FunctionType definition
-/// Used to name a function in the ApplyType
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(into, strip_option))]
-pub struct FunctionType {
-    #[serde(rename = "@FunctionId")]
-    function_id: function::Function,   
-}     
+
+
+
+   
 
 /// 5.29 AttributeDesignatorType definition
 /// Used to retrieve a bag of attributes from the request context
@@ -360,28 +329,22 @@ pub struct AttributeSelectorType {
     must_be_present: bool
 }
 
-/// 5.31 AttributeValueType definition
-/// Contains a literal attribute value
-/// Is kind of a special case as the data type of the value is described by the DataType attribute
-#[derive(Serialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(into, strip_option))]
-pub struct AttributeValueType {
-    #[serde(rename = "@DataType")]
-    data_type: DataType,          // More specific of URI type
-    #[serde(rename = "$value")]
-    value: Value
-}
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 #[serde(untagged)]
 pub enum Value {
-    String(String),
     Boolean(bool),
     Integer(i64),
-    Double(EqF64)
+    Double(EqF64),
+    String(String),
+    Date(String),
+    Time(String),
+    DateTime(String),
+    AnyURI(String),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(transparent)]
 pub struct EqF64(f64);
 
@@ -401,36 +364,6 @@ impl FromStr for EqF64 {
     }
 }
 
-impl<'de> Deserialize<'de> for AttributeValueType {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {       
-        #[derive(Deserialize)]
-        struct ValueHelper {
-            #[serde(rename = "@DataType")]
-            data_type: DataType,
-            #[serde(rename = "$value")]
-            value: String
-        }
-        /* 
-        let str: String = Deserialize::deserialize(deserializer)?;
-        print!("{}", str);
-        Err(serde::de::Error::custom("DEBUG"))
-        */ // /*
-        let helper = ValueHelper::deserialize(deserializer).map_err (|_| serde::de::Error::custom("Helper deserialization failed"))?;
-
-        match helper.data_type {
-            DataType::String => Ok(AttributeValueType{data_type: helper.data_type, value: Value::String(helper.value)}),
-            DataType::Boolean => Ok(AttributeValueType{data_type: helper.data_type, value: Value::Boolean(helper.value.parse().map_err( |_| serde::de::Error::custom("Invalid boolean"))?)}),
-            DataType::Integer => Ok(AttributeValueType{data_type: helper.data_type, value: Value::Integer(helper.value.parse().map_err( |_| serde::de::Error::custom("Invalid integer"))?)}),
-            DataType::AnyURI => Ok(AttributeValueType{data_type: helper.data_type, value: Value::String(helper.value)}),
-            DataType::Double => Ok(AttributeValueType{data_type: helper.data_type, value: Value::Double(helper.value.parse().map_err( |_| serde::de::Error::custom("Invalid double"))?)}),
-            _ => Err(serde::de::Error::custom("Unimplemented data type"))
-        }
-        //*/
-    }
-}
 
 /// 5.32 OblicationsType definition
 /// Contains a set of oblication elements
