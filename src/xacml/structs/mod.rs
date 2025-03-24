@@ -19,6 +19,7 @@ mod apply_type;
 mod function_type;
 mod function_implementation;
 mod attribute_value_type;
+mod attribute_designator_type;
 
 use core::str;
 use std::str::FromStr;
@@ -48,7 +49,7 @@ pub use expression_type::*;
 pub use apply_type::*;
 pub use function_type::*;
 pub use attribute_value_type::*;
-
+pub use attribute_designator_type::*;   
 
 use super::enums::{combining_algorithms::{PolicyCombiningAlgorithms, RuleCombiningAlgorithms}, data_types::DataType, *};
 
@@ -291,25 +292,6 @@ pub struct VariableReferenceType {
 
    
 
-/// 5.29 AttributeDesignatorType definition
-/// Used to retrieve a bag of attributes from the request context
-/// The attribute id must match the id of an attribute in the request context
-/// In case it is not contained, an error is raised according to the MustBePresent attribute
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(into, strip_option))]
-pub struct AttributeDesignatorType{
-    #[serde(rename = "@AttributeId")]
-    attribute_id: String,       // More specific of URI type
-    #[serde(rename = "@DataType")]
-    data_type: DataType,          // More specific of URI type
-    #[serde(rename = "@Category")]
-    category: String,           // More specific of URI type
-    #[serde(rename = "@MustBePresent")]
-    must_be_present: bool,
-    #[serde(rename = "@Issuer", skip_serializing_if = "Option::is_none")]
-    #[builder(default)]
-    issuer: Option<String>
-}
 
 /// 5.30 AttributeSelectorType definition
 /// Used to retrieve a bag of unnamed and uncategorized attributes from the request context

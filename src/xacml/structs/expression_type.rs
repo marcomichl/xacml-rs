@@ -23,6 +23,7 @@ impl ExpressionType {
         match self {
             ExpressionType::Apply(apply) => apply.evaluate(request),
             ExpressionType::AttributeValue(attribute_value) => attribute_value.evaluate(request),
+            ExpressionType::AttributeDesignator(attribute_designator) => attribute_designator.evaluate(request),
             _ => Err(XacmlError::new(XacmlErrorType::NotImplemented, "Expression evaluation not implemented".to_string()))
         }
     }

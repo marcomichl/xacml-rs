@@ -17,6 +17,10 @@ impl FunctionId {
     pub (super) fn apply(&self, parameters: &Vec<ExpressionType>, request: &RequestType) -> Result<Value, XacmlError> {
         match self {
             FunctionId::StringEqual => return string_equal(parameters, request),
+            FunctionId::BooleanEqual => return boolean_equal(parameters, request),
+            FunctionId::IntegerEqual => return integer_equal(parameters, request),
+            FunctionId::DoubleEqual => return double_equal(parameters, request),
+            FunctionId::AnyURIEqual => return any_uri_equal(parameters, request),
             _ => return Err(XacmlError::new(XacmlErrorType::NotImplemented, "Function not implemented".to_string()))
         }
     }

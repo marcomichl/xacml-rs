@@ -47,6 +47,6 @@ impl<'de> Deserialize<'de> for AttributeValueType {
 impl AttributeValueType {
     /// Evaluate the attribute value
     pub fn evaluate(&self, _request: &RequestType) -> Result<Value, XacmlError> {
-        Ok(self.value.clone())
+        Ok(self.value.clone())      // Could be relevant for a revision to change the type to a reference, but could be a problem with the lifetime of other return values (e.g. function results)
     }
 }
