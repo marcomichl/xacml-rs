@@ -14,7 +14,7 @@ pub struct FunctionType {
 
 impl FunctionId {
     /// Evaluate the function
-    pub (super) fn apply(&self, parameters: &Vec<ExpressionType>, request: &RequestType) -> Result<Value, XacmlError> {
+    pub (super) fn apply(&self, parameters: &Vec<ExpressionType>, request: &RequestType) -> Result<Vec<Value>, XacmlError> {
         match self {
             FunctionId::StringEqual => return string_equal(parameters, request),
             FunctionId::BooleanEqual => return boolean_equal(parameters, request),

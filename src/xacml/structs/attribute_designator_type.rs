@@ -23,7 +23,7 @@ pub struct AttributeDesignatorType{
 
 impl AttributeDesignatorType {
     /// Evaluate the attribute designator
-    pub fn evaluate(&self, request: &RequestType) -> Result<Value, XacmlError> {
+    pub fn evaluate(&self, request: &RequestType) -> Result<Vec<Value>, XacmlError> {
         return Err(XacmlError::new(XacmlErrorType::NotImplemented, "AttributeDesignator evaluation not implemented".to_string()))
     }
 }

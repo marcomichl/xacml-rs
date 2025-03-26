@@ -17,7 +17,7 @@ pub struct ApplyType {
 
 impl ApplyType {
     /// Evaluate the apply
-    pub fn evaluate(&self, request: &RequestType) -> Result<Value, XacmlError> {
+    pub fn evaluate(&self, request: &RequestType) -> Result<Vec<Value>, XacmlError> {
         let empty_vec: Vec<ExpressionType> = Vec::new();
         return self.function_id.apply(self.expression.as_ref().unwrap_or_else(|| &empty_vec), request)
     }

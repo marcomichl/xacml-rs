@@ -326,7 +326,7 @@ pub enum Value {
     AnyURI(String),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 #[serde(transparent)]
 pub struct EqF64(f64);
 

@@ -19,7 +19,7 @@ pub enum ExpressionType {
 }
 
 impl ExpressionType {
-    pub fn evaluate(&self, request: &RequestType) -> Result<Value, XacmlError> {
+    pub fn evaluate(&self, request: &RequestType) -> Result<Vec<Value>, XacmlError> {
         match self {
             ExpressionType::Apply(apply) => apply.evaluate(request),
             ExpressionType::AttributeValue(attribute_value) => attribute_value.evaluate(request),

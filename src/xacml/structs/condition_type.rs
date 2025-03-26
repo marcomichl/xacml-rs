@@ -16,7 +16,11 @@ pub struct ConditionType {
 impl ConditionType {
     /// Evaluate the condition
     pub fn evaluate(&self, request: &RequestType) -> Result<bool, XacmlError> {
-        match self.expression.evaluate(request)? {
+        let result = self.expression.evaluate(request)?;
+        if result.len() != 1 {
+            return Err(XacmlError::new(XacmlErrorType::ProcessingError, "Condition evaluation result is not a single value".to_string()))
+        }
+        match result[0] {
             Value::Boolean(value) => {
                 return Ok(value)
             },
