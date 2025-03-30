@@ -324,6 +324,7 @@ pub enum Value {
     Time(String),
     DateTime(String),
     AnyURI(String),
+    Indeterminate,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]

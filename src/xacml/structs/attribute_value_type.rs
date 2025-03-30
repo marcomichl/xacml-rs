@@ -47,6 +47,58 @@ impl<'de> Deserialize<'de> for AttributeValueType {
 impl AttributeValueType {
     /// Evaluate the attribute value
     pub fn evaluate(&self, _request: &RequestType) -> Result<Vec<Value>, XacmlError> {
-        Ok([self.value.clone()].to_vec())      // Could be relevant for a revision to change the type to a reference, but could be a problem with the lifetime of other return values (e.g. function results)
+        Ok(vec![self.get_value()?])      // Could be relevant for a revision to change the type to a reference, but could be a problem with the lifetime of other return values (e.g. function results)
+    }
+
+    pub fn get_value(&self) -> Result<Value, XacmlError> {
+        Ok(self.value.clone())
+    }
+}
+
+mod test_attribute_value_type {
+    use std::sync::Arc;
+
+    use super::*;
+
+    #[test]
+    fn test_attribute_value_type() {
+        let attribute_value = AttributeValueType{
+            data_type: DataType::String,
+            value: Value::String("test".to_string())
+        };
+        let builder_attribute_value = AttributeValueTypeBuilder::default()
+            .data_type(DataType::String)
+            .value(Value::String("test".to_string()))
+            .build()
+            .unwrap();
+        assert_eq!(attribute_value.data_type, DataType::String);
+        assert_eq!(attribute_value.value, Value::String("test".to_string()));
+        assert_eq!(builder_attribute_value, attribute_value);
+    }
+
+    #[test]
+    fn test_attribute_value_type_get_value() {
+        let attribute_value = AttributeValueType{
+            data_type: DataType::String,
+            value: Value::String("test".to_string())
+        };
+        let value = attribute_value.get_value().unwrap();
+        assert_eq!(value, Value::String("test".to_string()));
+    }
+    #[test]
+    fn test_attribute_value_type_evaluate() {
+        let attribute_value = AttributeValueType{
+            data_type: DataType::String,
+            value: Value::String("test".to_string())
+        };
+        let request = RequestTypeBuilder::default()
+            .return_policy_id_list(false)
+            .combined_decision(false)
+            .attributes(vec![])
+            .build()
+            .unwrap();
+        let values = attribute_value.evaluate(&request).unwrap();
+        assert_eq!(values.len(), 1);
+        assert_eq!(values[0], Value::String("test".to_string()));
     }
 }

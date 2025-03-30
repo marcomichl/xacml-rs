@@ -24,6 +24,21 @@ pub struct AttributeDesignatorType{
 impl AttributeDesignatorType {
     /// Evaluate the attribute designator
     pub fn evaluate(&self, request: &RequestType) -> Result<Vec<Value>, XacmlError> {
-        return Err(XacmlError::new(XacmlErrorType::NotImplemented, "AttributeDesignator evaluation not implemented".to_string()))
+        let attributes = request.attributes.iter()
+            .map(|attr| attr.get_attribute_value_by_designator(self))
+            .collect::<Result<Vec<&AttributeValueType>, XacmlError>>()?;
+        let values = attributes.iter()
+            .flat_map(|attr| attr.get_value())
+            .collect::<Vec<Value>>();
+        if values.len() > 0 {
+            return Ok(values);
+        }
+        // This code is reached of there are no matching attributes
+        if self.must_be_present {
+            return Ok(vec![Value::Indeterminate]);
+        }
+        else {
+            return Ok(Vec::new());
+        }
     }
 }

@@ -16,6 +16,7 @@ pub struct RequestType {
     #[serde(rename = "Attributes")]
     pub(super) attributes: Vec<AttributesType>,
     #[serde(rename = "MultiRequests", skip_serializing_if = "UnimplementedField::is_none")]
+    #[builder(default = "UnimplementedField(None)")]
     pub(super) multi_requests: UnimplementedField // Is not yet implemented and optional, will fail if present
 }
 
