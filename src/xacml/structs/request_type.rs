@@ -42,3 +42,83 @@ impl UnimplementedField {
         self.0.is_none()
     }
 }
+
+#[cfg(test)]
+mod request_type_test {
+    use super::*;
+
+    #[test]
+    fn request_type_builder_test() {
+        let request = RequestTypeBuilder::default()
+            .return_policy_id_list(false)
+            .combined_decision(false)
+            .attributes(vec![])
+            .build()
+            .unwrap();
+        assert_eq!(request.return_policy_id_list, false);
+        assert_eq!(request.combined_decision, false);
+        assert_eq!(request.attributes, vec![]);
+    }
+
+    #[test]
+    fn request_type_serialization_test(){
+        let request = RequestTypeBuilder::default()
+            .return_policy_id_list(false)
+            .combined_decision(false)
+            .attributes(vec![AttributesTypeBuilder::default()
+                .category("TestCategory")
+                .attribute(vec![AttributeTypeBuilder::default()
+                    .attribute_id("Test-ID")
+                    .include_in_result(false)
+                    .attribute_value(vec![AttributeValueTypeBuilder::default()
+                        .data_type(DataType::Integer)
+                        .value(Value::Integer(23))
+                        .build()
+                        .unwrap()    
+                        ])
+                    .build()
+                    .unwrap()
+                ])
+                .build().unwrap()
+            ])
+            .build()
+            .unwrap();
+        assert_eq!(quick_xml::se::to_string(&request).unwrap(), r#"<RequestType ReturnPolicyIdList="false" CombinedDecision="false"><Attributes Category="TestCategory"><Attribute AttributeId="Test-ID" IncludeInResult="false"><AttributeValue DataType="http://www.w3.org/2001/XMLSchema#integer">23</AttributeValue></Attribute></Attributes></RequestType>"#)
+    }
+
+    #[test]
+    fn request_type_deserialization_test() {
+        let serialized_request = r#"<RequestType ReturnPolicyIdList="false" CombinedDecision="false"><Attributes Category="TestCategory"><Attribute AttributeId="Test-ID" IncludeInResult="false"><AttributeValue DataType="http://www.w3.org/2001/XMLSchema#integer">23</AttributeValue></Attribute></Attributes></RequestType>"#;
+        let request: RequestType = quick_xml::de::from_str(&serialized_request).unwrap();
+        let built_request = RequestTypeBuilder::default()
+            .return_policy_id_list(false)
+            .combined_decision(false)
+            .attributes(vec![AttributesTypeBuilder::default()
+                .category("TestCategory")
+                .attribute(vec![AttributeTypeBuilder::default()
+                    .attribute_id("Test-ID")
+                    .include_in_result(false)
+                    .attribute_value(vec![AttributeValueTypeBuilder::default()
+                        .data_type(DataType::Integer)
+                        .value(Value::Integer(23))
+                        .build()
+                        .unwrap()    
+                        ])
+                    .build()
+                    .unwrap()
+                ])
+                .build().unwrap()
+            ])
+            .build()
+            .unwrap();
+        assert_eq!(request, built_request);
+    }
+
+    #[test]
+    #[should_panic(expected = "Field must not be present: Test String")]
+    fn request_type_deserialization_failed_multirequest_test () {
+        let serialized_request = r#"<RequestType ReturnPolicyIdList="false" CombinedDecision="false"><Attributes Category="TestCategory"><Attribute AttributeId="Test-ID" IncludeInResult="false"><AttributeValue DataType="http://www.w3.org/2001/XMLSchema#integer">23</AttributeValue></Attribute></Attributes><MultiRequests>Test String</MultiRequests></RequestType>"#;
+        let _request = quick_xml::de::from_str::<RequestType>(&serialized_request).unwrap();
+    }
+
+}

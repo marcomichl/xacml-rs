@@ -24,9 +24,13 @@ impl MatchType{
         if self.attribute_designator.is_some() {
             let attribute_designator = self.attribute_designator.as_ref().unwrap();
             for attributes in &request.attributes {
-                let result = attributes.get_attribute_value_by_designator(attribute_designator);
+                let result = attributes.get_attribute_values_by_designator(attribute_designator);
                 if result.is_ok() {
-                    return Ok(result.unwrap() == attribute);
+                    for value in result.unwrap() {
+                        if value == attribute {
+                            return Ok(true);
+                        }
+                    }
                 }
             }
         }
@@ -45,3 +49,134 @@ impl MatchType{
         Ok(false)   //Did not find the attribute
     }
 }
+
+#[cfg(test)]
+mod test_match_type {
+    use super::*;
+
+    #[test]
+    fn match_request_test () {
+        let request1 = RequestTypeBuilder::default()
+            .return_policy_id_list(false)
+            .combined_decision(false)
+            .attributes(vec![AttributesTypeBuilder::default()
+                .category("TestCategory")
+                .attribute(vec![AttributeTypeBuilder::default()
+                    .attribute_id("Test-ID")
+                    .include_in_result(false)
+                    .attribute_value(vec![AttributeValueTypeBuilder::default()
+                        .data_type(DataType::Integer)
+                        .value(Value::Integer(23))
+                        .build()
+                        .unwrap()    
+                        ])
+                    .build()
+                    .unwrap()
+                ])
+                .build().unwrap()
+            ])
+            .build()
+            .unwrap();
+        let request2 = RequestTypeBuilder::default()
+            .return_policy_id_list(false)
+            .combined_decision(false)
+            .attributes(vec![AttributesTypeBuilder::default()
+                .category("TestCategory")
+                .attribute(vec![AttributeTypeBuilder::default()
+                    .attribute_id("Test-ID")
+                    .include_in_result(false)
+                    .attribute_value(vec![AttributeValueTypeBuilder::default()
+                        .data_type(DataType::Integer)
+                        .value(Value::Integer(21))
+                        .build()
+                        .unwrap()    
+                        ])
+                    .build()
+                    .unwrap()
+                ])
+                .build().unwrap()
+            ])
+            .build()
+            .unwrap();
+        let request3 = RequestTypeBuilder::default()
+            .return_policy_id_list(false)
+            .combined_decision(false)
+            .attributes(vec![AttributesTypeBuilder::default()
+                .category("TestCategory")
+                .attribute(vec![AttributeTypeBuilder::default()
+                    .attribute_id("Wrong-ID")
+                    .include_in_result(false)
+                    .attribute_value(vec![AttributeValueTypeBuilder::default()
+                        .data_type(DataType::Integer)
+                        .value(Value::Integer(23))
+                        .build()
+                        .unwrap()    
+                        ])
+                    .build()
+                    .unwrap()
+                ])
+                .build().unwrap()
+            ])
+            .build()
+            .unwrap();
+        let request4 = RequestTypeBuilder::default()
+            .return_policy_id_list(false)
+            .combined_decision(false)
+            .attributes(vec![AttributesTypeBuilder::default()
+                .category("WrongCategory")
+                .attribute(vec![AttributeTypeBuilder::default()
+                    .attribute_id("Test-ID")
+                    .include_in_result(false)
+                    .attribute_value(vec![AttributeValueTypeBuilder::default()
+                        .data_type(DataType::Integer)
+                        .value(Value::Integer(23))
+                        .build()
+                        .unwrap()    
+                        ])
+                    .build()
+                    .unwrap()
+                ])
+                .build().unwrap()
+            ])
+            .build()
+            .unwrap();
+        let request5 = RequestTypeBuilder::default()
+            .return_policy_id_list(false)
+            .combined_decision(false)
+            .attributes(vec![AttributesTypeBuilder::default()
+                .category("TestCategory")
+                .attribute(vec![AttributeTypeBuilder::default()
+                    .attribute_id("Test-ID")
+                    .include_in_result(false)
+                    .attribute_value(vec![AttributeValueTypeBuilder::default()
+                        .data_type(DataType::Double)
+                        .value(Value::Integer(23))  //Should not happen, for test purpose..
+                        .build()
+                        .unwrap()    
+                        ])
+                    .build()
+                    .unwrap()
+                ])
+                .build().unwrap()
+            ])
+            .build()
+            .unwrap();
+        let match_type = MatchTypeBuilder::default()
+            .attribute_designator(AttributeDesignatorTypeBuilder::default()
+                .category("TestCategory")
+                .attribute_id("Test-ID")
+                .data_type(DataType::Integer)
+                .must_be_present(true)
+                .build().unwrap()
+            )
+            .attribute_value(AttributeValueType{data_type: DataType::Integer, value: Value::Integer(23)})
+            .match_id("Test-Match")
+            .build().unwrap();
+
+        assert_eq!(match_type.match_request(&request1).unwrap(), true);
+        assert_eq!(match_type.match_request(&request2).unwrap(), false);
+        assert_eq!(match_type.match_request(&request3).unwrap(), false);
+        assert_eq!(match_type.match_request(&request4).unwrap(), false);
+        assert_eq!(match_type.match_request(&request5).unwrap(), false);
+    }
+}   

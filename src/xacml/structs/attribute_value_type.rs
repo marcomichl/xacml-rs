@@ -55,9 +55,8 @@ impl AttributeValueType {
     }
 }
 
+#[cfg(test)]
 mod test_attribute_value_type {
-    use std::sync::Arc;
-
     use super::*;
 
     #[test]

@@ -9,3 +9,7 @@ Rust-based XACML engine
 - AttributeAssignmentType extends AttributeValue, did not yet implement this (would need to reuse the specific dataType extraction)
 - Only some dataTypes implemented
 
+## ToDos
+
+- Testing, especially:
+    - AttributeDesignatorType::evaluate with multiple elements of varying relevance

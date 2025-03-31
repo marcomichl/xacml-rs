@@ -24,12 +24,10 @@ pub struct AttributeDesignatorType{
 impl AttributeDesignatorType {
     /// Evaluate the attribute designator
     pub fn evaluate(&self, request: &RequestType) -> Result<Vec<Value>, XacmlError> {
-        let attributes = request.attributes.iter()
-            .map(|attr| attr.get_attribute_value_by_designator(self))
-            .collect::<Result<Vec<&AttributeValueType>, XacmlError>>()?;
-        let values = attributes.iter()
-            .flat_map(|attr| attr.get_value())
-            .collect::<Vec<Value>>();
+        let values: Vec<Value> = request.attributes.iter()
+            .flat_map(|attr| attr.get_values_by_designator(self))
+            .flatten()
+            .collect();
         if values.len() > 0 {
             return Ok(values);
         }
@@ -41,4 +39,43 @@ impl AttributeDesignatorType {
             return Ok(Vec::new());
         }
     }
+}
+
+#[cfg(test)]
+mod attribute_designator_type_test {
+    use super::*;
+
+    #[test]
+    fn attribute_designator_type_evaluate_test() {
+        let request = RequestTypeBuilder::default()
+            .return_policy_id_list(false)
+            .combined_decision(false)
+            .attributes(vec![AttributesTypeBuilder::default()
+                .category("TestCategory")
+                .attribute(vec![AttributeTypeBuilder::default()
+                    .attribute_id("Test-ID")
+                    .include_in_result(false)
+                    .attribute_value(vec![AttributeValueTypeBuilder::default()
+                        .data_type(DataType::Integer)
+                        .value(Value::Integer(23))
+                        .build()
+                        .unwrap()    
+                        ])
+                    .build()
+                    .unwrap()
+                ])
+                .build().unwrap()
+            ])
+            .build()
+            .unwrap();
+        let designator = AttributeDesignatorTypeBuilder::default()
+            .attribute_id("Test-ID")
+            .data_type(DataType::Integer)
+            .category("TestCategory")
+            .must_be_present(false)
+            .build().unwrap();
+        let result = designator.evaluate(&request).unwrap();
+        println!("{:?}", result);
+    }
+
 }

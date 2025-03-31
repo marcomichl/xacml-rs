@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use super::*;
 
 /// 5.44 AttributesType
@@ -18,27 +20,34 @@ pub struct AttributesType {
     attribute: Option<Vec<AttributeType>>    // Type 5.46, defined as sequence with ANY number
 }
 
+// todo: adapt functions to allow returning of multiple values; do not fail if the attributes do not match
 impl AttributesType{
-    pub fn get_attribute_value_by_designator(&self, designator: &AttributeDesignatorType) -> Result<&AttributeValueType, XacmlError> {
-        if self.category != designator.category {
-            return Err(XacmlError::new(XacmlErrorType::FormatError, "AttributeDesignator does not match the category of the request".to_string()));
+
+
+    pub fn get_attribute_values_by_designator(&self, designator: &AttributeDesignatorType) -> Result<Vec<&AttributeValueType>, XacmlError> {
+        if self.category != designator.category || self.attribute.is_none() {
+            return Ok(vec![])       // Category of whole AttributesType does not match
         }
-        let attribute_values = self.attribute.as_ref()
-            .ok_or(XacmlError::new(XacmlErrorType::FormatError, "No attributes in the request".to_string()))?
+        // Verify attribute-field, AttributeType::attribute_id and issuer
+        let attribute_values: Vec<&AttributeValueType> = self.attribute.as_ref()
+            .ok_or(XacmlError::new(XacmlErrorType::FormatError, "No attributes in the request, should not happen!".to_string()))?
+                // if an error is thrown here, something went wrong as this was tested above
                 .iter()
                 .filter(|attr| attr.attribute_id == designator.attribute_id)
                 .filter(|attr| attr.issuer.as_ref() == designator.issuer.as_ref())
-                .collect::<Vec<&AttributeType>>();
+                .flat_map(|attribute| 
+                    attribute.attribute_value.iter() 
+                        .filter(|attribute_value| attribute_value.data_type == designator.data_type)
+                    )
+                .collect();
+        Ok(attribute_values)
+    }
 
-        for attribute in attribute_values {
-            for value in &attribute.attribute_value {
-                if value.data_type == designator.data_type {
-                    return Ok(value);
-                }
-            }
-        }
-        
-        Err(XacmlError::new(XacmlErrorType::FormatError, "AttributeDesignator does not match any attribute in the request".to_string()))
+    pub fn get_values_by_designator(&self, designator: &AttributeDesignatorType) -> Result<Vec<Value>, XacmlError> {
+        self.get_attribute_values_by_designator(designator)?
+            .iter()
+            .map(|attribute_value| attribute_value.get_value())
+            .collect()
     }
 
     pub fn get_attribute_value_by_selector(&self, selector: &AttributeSelectorType) -> Result<&AttributeValueType, XacmlError> {
