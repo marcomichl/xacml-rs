@@ -23,15 +23,13 @@ impl MatchType{
         let attribute = &self.attribute_value;
         if self.attribute_designator.is_some() {
             let attribute_designator = self.attribute_designator.as_ref().unwrap();
-            for attributes in &request.attributes {
-                let result = attributes.get_attribute_values_by_designator(attribute_designator);
-                if result.is_ok() {
-                    for value in result.unwrap() {
-                        if value == attribute {
-                            return Ok(true);
-                        }
-                    }
-                }
+            if !request.attributes.iter()
+                .flat_map(|attributes| attributes.get_attribute_values_by_designator(attribute_designator))
+                .flatten()
+                .filter(|filtered_attribute_value| filtered_attribute_value == &attribute)
+                .collect::<Vec<&AttributeValueType>>().is_empty() 
+            {
+                return Ok(true)
             }
         }
         else if self.attribute_selector.is_some() {
