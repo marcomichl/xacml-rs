@@ -46,13 +46,18 @@ impl<'de> Deserialize<'de> for AttributeValueType {
 
 impl AttributeValueType {
     /// Evaluate the attribute value
-    pub fn evaluate(&self, _request: &RequestType) -> Result<Vec<Value>, XacmlError> {
+    pub (super) fn evaluate(&self, _request: &RequestType) -> Result<Vec<Value>, XacmlError> {
         Ok(vec![self.get_value()?])      // Could be relevant for a revision to change the type to a reference, but could be a problem with the lifetime of other return values (e.g. function results)
     }
 
-    pub fn get_value(&self) -> Result<Value, XacmlError> {
+    pub (super) fn get_value(&self) -> Result<Value, XacmlError> {
         Ok(self.value.clone())
     }
+
+    pub (super) fn match_data_type(&self, data_type: &DataType) -> bool {
+        return &self.data_type == data_type
+    }
+
 }
 
 #[cfg(test)]

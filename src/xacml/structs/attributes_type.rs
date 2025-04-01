@@ -33,12 +33,8 @@ impl AttributesType{
             .ok_or(XacmlError::new(XacmlErrorType::FormatError, "No attributes in the request, should not happen!".to_string()))?
                 // if an error is thrown here, something went wrong as this was tested above
                 .iter()
-                .filter(|attr| attr.attribute_id == designator.attribute_id)
-                .filter(|attr| attr.issuer.as_ref() == designator.issuer.as_ref())
-                .flat_map(|attribute| 
-                    attribute.attribute_value.iter() 
-                        .filter(|attribute_value| attribute_value.data_type == designator.data_type)
-                    )
+                .flat_map(|attribute| attribute.get_attribute_values_by_designator(designator))
+                .flatten()
                 .collect();
         Ok(attribute_values)
     }
@@ -52,5 +48,61 @@ impl AttributesType{
 
     pub fn get_attribute_value_by_selector(&self, selector: &AttributeSelectorType) -> Result<&AttributeValueType, XacmlError> {
         Err(XacmlError::new(XacmlErrorType::NotImplemented, "AttributeSelector not implemented as Content is not implemented".to_string()))
+    }
+}
+
+#[cfg(test)]
+mod attributes_type_test{
+    use super::*;
+
+    #[test]
+    fn get_value_by_selector_test() {
+        let designator1 = AttributeDesignatorTypeBuilder::default()
+            .attribute_id("Test-ID")
+            .category("Test-Category")
+            .data_type(DataType::Boolean)
+            .must_be_present(true)
+            .build().unwrap();
+        let designator2 = AttributeDesignatorTypeBuilder::default()
+            .attribute_id("Test-ID")
+            .category("Test-Category")
+            .data_type(DataType::Integer)
+            .must_be_present(true)
+            .build().unwrap();
+        let designator3 = AttributeDesignatorTypeBuilder::default()
+            .attribute_id("Test-ID")
+            .category("Test-Category")
+            .data_type(DataType::Double)
+            .must_be_present(true)
+            .build().unwrap();
+        let designator4 = AttributeDesignatorTypeBuilder::default()
+            .attribute_id("Test-ID")
+            .category("Test-Category")
+            .issuer("Test-Issuer")
+            .data_type(DataType::Double)
+            .must_be_present(true)
+            .build().unwrap();
+        let attribute = AttributeTypeBuilder::default()
+            .attribute_id("Test-ID")
+            .include_in_result(true)
+            .attribute_value(vec![AttributeValueTypeBuilder::default()
+                .data_type(DataType::Boolean)
+                .value(Value::Boolean(true))
+                .build().unwrap(), 
+                AttributeValueTypeBuilder::default()
+                .data_type(DataType::Integer)
+                .value(Value::Integer(23))
+                .build().unwrap()
+                ])
+            .build().unwrap();
+        let attributes = AttributesTypeBuilder::default()
+            .category("Test-Category")
+            .attribute(vec![attribute])
+            .build().unwrap();
+        assert_eq!(attributes.get_values_by_designator(&designator1).unwrap(), vec![Value::Boolean(true)]);
+        assert_eq!(attributes.get_values_by_designator(&designator2).unwrap(), vec![Value::Integer(23)]);
+        assert_eq!(attributes.get_values_by_designator(&designator3).unwrap(), vec![]);
+        assert_eq!(attributes.get_values_by_designator(&designator4).unwrap(), vec![]);
+
     }
 }
