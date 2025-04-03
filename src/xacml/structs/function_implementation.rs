@@ -94,3 +94,36 @@ pub (super) fn any_uri_equal(parameters: &Vec<ExpressionType>, request: &Request
         _ => return Err(XacmlError::new(XacmlErrorType::ProcessingError, "AnyURIEquals function requires two string parameters".to_string()))
     }
 }
+
+pub (super) fn integer_add(parameters: &Vec<ExpressionType>, request: &RequestType) -> Result<Vec<Value>, XacmlError> {
+    let mut values: Vec<i64> = [].to_vec();
+    for parameter in parameters {
+        let value = parameter.evaluate(request)?;
+        match (&value[0]) {
+            (Value::Integer(int)) => values.push(*int),
+            _ => return Err(XacmlError::new(XacmlErrorType::ProcessingError, "IntegerAdd function requires only integer parameters".to_string()))
+        }
+    };
+    let mut result: i64 = 0;
+    values.iter().for_each(|x| result+=*x);
+    return Ok(vec![Value::Integer(result)])
+}
+
+#[cfg(test)]
+mod function_implementation_test {
+    use super::*;
+
+    #[test]
+    fn integer_add_test() {
+        let parameters = vec![ExpressionType::AttributeValue(AttributeValueType{data_type: DataType::Integer, value: Value::Integer(23)}),
+            ExpressionType::AttributeValue(AttributeValueType{data_type: DataType::Integer, value: Value::Integer(27)})];
+        let request = RequestTypeBuilder::default()
+            .return_policy_id_list(true)
+            .combined_decision(true)
+            .attributes(Vec::<AttributesType>::new())
+            .build().unwrap();
+        let result = integer_add(&parameters, &request).unwrap();
+        assert_eq!(1, result.len());
+        assert_eq!(result[0], Value::Integer(50));
+    }
+}
