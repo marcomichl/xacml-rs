@@ -338,6 +338,11 @@ impl PartialEq for EqF64 {
         self.0.to_bits() == other.0.to_bits()
     }
 }
+impl From<f64> for EqF64 {
+    fn from(value: f64) -> Self {
+        EqF64(value)
+    }
+}
 
 impl FromStr for EqF64 {
     type Err = ();

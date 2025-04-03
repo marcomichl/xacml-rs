@@ -109,6 +109,20 @@ pub (super) fn integer_add(parameters: &Vec<ExpressionType>, request: &RequestTy
     return Ok(vec![Value::Integer(result)])
 }
 
+pub (super) fn double_add(parameters: &Vec<ExpressionType>, request: &RequestType) -> Result<Vec<Value>, XacmlError> {
+    let mut values: Vec<EqF64> = [].to_vec();
+    for parameter in parameters {
+        let value = parameter.evaluate(request)?;
+        match (&value[0]) {
+            (Value::Double(dbl)) => values.push(*dbl),
+            _ => return Err(XacmlError::new(XacmlErrorType::ProcessingError, "DoubleAdd function requires only double parameters".to_string()))
+        }
+    };
+    let mut result: EqF64 = EqF64(0.0);
+    values.iter().for_each(|x| result.0+= x.0);
+    return Ok(vec![Value::Double(result)])
+}
+
 #[cfg(test)]
 mod function_implementation_test {
     use super::*;
@@ -125,5 +139,19 @@ mod function_implementation_test {
         let result = integer_add(&parameters, &request).unwrap();
         assert_eq!(1, result.len());
         assert_eq!(result[0], Value::Integer(50));
+    }
+
+    #[test]
+    fn double_add_test() {
+        let parameters = vec![ExpressionType::AttributeValue(AttributeValueType{data_type: DataType::Double, value: Value::Double(22.9.into())}),
+            ExpressionType::AttributeValue(AttributeValueType{data_type: DataType::Double, value: Value::Double(27.1.into())})];
+        let request = RequestTypeBuilder::default()
+            .return_policy_id_list(true)
+            .combined_decision(true)
+            .attributes(Vec::<AttributesType>::new())
+            .build().unwrap();
+        let result = double_add(&parameters, &request).unwrap();
+        assert_eq!(1, result.len());
+        assert_eq!(result[0], Value::Double(50.0.into()));
     }
 }
