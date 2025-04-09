@@ -110,17 +110,43 @@ pub (super) fn integer_add(parameters: &Vec<ExpressionType>, request: &RequestTy
 }
 
 pub (super) fn double_add(parameters: &Vec<ExpressionType>, request: &RequestType) -> Result<Vec<Value>, XacmlError> {
+    let mut values = get_double_values(parameters, request)?;
+    let mut result: EqF64 = EqF64(0.0);
+    values.iter().for_each(|x| result.0+= x.0);
+    return Ok(vec![Value::Double(result)])
+}
+
+pub (super) fn double_subtract(parameters: &Vec<ExpressionType>, request: &RequestType) -> Result<Vec<Value>, XacmlError> {
+    let mut values = get_double_values(parameters, request)?;
+    let mut result = values[0].0 *2.0  ;  // gets subtracted once
+    values.iter().for_each(|x | result -= x.0);
+    return Ok(vec![Value::Double(result.into())])
+}
+
+pub (super) fn double_multiply(parameters: &Vec<ExpressionType>, request: &RequestType) -> Result<Vec<Value>, XacmlError> {
+    let mut values = get_double_values(parameters, request)?;
+    let mut result = 1.0 ; 
+    values.iter().for_each(|x | result *= x.0);
+    return Ok(vec![Value::Double(result.into())])
+}
+
+pub (super) fn double_divide(parameters: &Vec<ExpressionType>, request: &RequestType) -> Result<Vec<Value>, XacmlError> {
+    let mut values = get_double_values(parameters, request)?;
+    let mut result = values[0].0 * values[0].0 ; 
+    values.iter().for_each(|x | result /= x.0);
+    return Ok(vec![Value::Double(result.into())])
+}
+
+fn get_double_values(parameters: &Vec<ExpressionType>, request: &RequestType) -> Result<Vec<EqF64>, XacmlError> {
     let mut values: Vec<EqF64> = [].to_vec();
     for parameter in parameters {
         let value = parameter.evaluate(request)?;
         match (&value[0]) {
             (Value::Double(dbl)) => values.push(*dbl),
-            _ => return Err(XacmlError::new(XacmlErrorType::ProcessingError, "DoubleAdd function requires only double parameters".to_string()))
+            _ => return Err(XacmlError::new(XacmlErrorType::ProcessingError, "Double-based function requires only double parameters".to_string()))
         }
     };
-    let mut result: EqF64 = EqF64(0.0);
-    values.iter().for_each(|x| result.0+= x.0);
-    return Ok(vec![Value::Double(result)])
+    return Ok(values)
 }
 
 #[cfg(test)]

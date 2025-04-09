@@ -22,7 +22,7 @@ mod attribute_value_type;
 mod attribute_designator_type;
 
 use core::str;
-use std::str::FromStr;
+use std::{ops::Deref, str::FromStr};
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
@@ -349,6 +349,13 @@ impl FromStr for EqF64 {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         s.parse::<f64>().map(EqF64).map_err(|_| ())
+    }
+}
+
+impl Deref for EqF64 {
+    type Target = f64;
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 

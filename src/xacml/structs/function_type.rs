@@ -21,6 +21,11 @@ impl FunctionId {
             FunctionId::IntegerEqual => return integer_equal(parameters, request),
             FunctionId::DoubleEqual => return double_equal(parameters, request),
             FunctionId::AnyURIEqual => return any_uri_equal(parameters, request),
+            FunctionId::IntegerAdd => return integer_add(parameters, request),
+            FunctionId::DoubleAdd => return double_add(parameters, request),
+            FunctionId::DoubleSubtract => return double_subtract(parameters, request),
+            FunctionId::DoubleMultiply => return double_multiply(parameters, request),
+            FunctionId::DoubleDivide => return double_divide(parameters, request),
             _ => return Err(XacmlError::new(XacmlErrorType::NotImplemented, "Function not implemented".to_string()))
         }
     }
