@@ -96,14 +96,7 @@ pub (super) fn any_uri_equal(parameters: &Vec<ExpressionType>, request: &Request
 }
 
 pub (super) fn integer_add(parameters: &Vec<ExpressionType>, request: &RequestType) -> Result<Vec<Value>, XacmlError> {
-    let mut values: Vec<i64> = [].to_vec();
-    for parameter in parameters {
-        let value = parameter.evaluate(request)?;
-        match (&value[0]) {
-            (Value::Integer(int)) => values.push(*int),
-            _ => return Err(XacmlError::new(XacmlErrorType::ProcessingError, "IntegerAdd function requires only integer parameters".to_string()))
-        }
-    };
+    let mut values: Vec<i64> = get_integer_values(parameters, request)?;
     let mut result: i64 = 0;
     values.iter().for_each(|x| result+=*x);
     return Ok(vec![Value::Integer(result)])
@@ -144,6 +137,18 @@ fn get_double_values(parameters: &Vec<ExpressionType>, request: &RequestType) ->
         match (&value[0]) {
             (Value::Double(dbl)) => values.push(*dbl),
             _ => return Err(XacmlError::new(XacmlErrorType::ProcessingError, "Double-based function requires only double parameters".to_string()))
+        }
+    };
+    return Ok(values)
+}
+
+fn get_integer_values(parameters: &Vec<ExpressionType>, request: &RequestType) -> Result<Vec<i64>, XacmlError> {
+    let mut values: Vec<i64> = [].to_vec();
+    for parameter in parameters {
+        let value = parameter.evaluate(request)?;
+        match (&value[0]) {
+            (Value::Integer(int)) => values.push(*int),
+            _ => return Err(XacmlError::new(XacmlErrorType::ProcessingError, "Integer-based function requires only integer parameters".to_string()))
         }
     };
     return Ok(values)

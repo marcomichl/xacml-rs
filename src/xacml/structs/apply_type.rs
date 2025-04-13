@@ -3,7 +3,7 @@ use super::*;
 /// 5.27 ApplyType definition
 /// Describes the application of a function to its arguments
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
+#[builder(pattern = "owned", setter(into, strip_option))]
 pub struct ApplyType {
     #[serde(rename = "@FunctionId")]
     function_id: FunctionId,        // More specific of URI type
