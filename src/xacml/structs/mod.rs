@@ -313,12 +313,12 @@ pub struct AttributeSelectorType {
 
 
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialOrd, Debug, Clone)]
 #[serde(untagged)]
 pub enum Value {
     Boolean(bool),
     Integer(i64),
-    Double(EqF64),
+    Double(f64),
     String(String),
     Date(String),
     Time(String),
@@ -327,38 +327,72 @@ pub enum Value {
     Indeterminate,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
-#[serde(transparent)]
-pub struct EqF64(f64);
+impl Eq for Value {}
 
-impl Eq for EqF64 {}
-
-impl PartialEq for EqF64 {
-    fn eq(&self, other: &EqF64) -> bool {
-        self.0.to_bits() == other.0.to_bits()
+/// Custom implementation of PartialEq so that f64 can be matched (interpreted bitwise)
+impl PartialEq for Value{
+    fn eq(&self, other: &Self) -> bool {
+        match self {
+            Value::Boolean(val) => {
+                if let Value::Boolean(other_val) = other {
+                    val == other_val
+                } else {
+                    false
+                }
+            }
+            Value::Integer(val) => {
+                if let Value::Integer(other_val) = other {
+                    val == other_val
+                } else {
+                    false
+                }
+            }
+            Value::Double(val) => {
+                if let Value::Double(other_val) = other {
+                    val.to_bits() == other_val.to_bits()
+                } else {
+                    false
+                }
+            }
+            Value::String(val) => {
+                if let Value::String(other_val) = other {
+                    val == other_val
+                } else {
+                    false
+                }
+            }
+            Value::Date(val) => {
+                if let Value::Date(other_val) = other {
+                    val == other_val
+                } else {
+                    false
+                }
+            }
+            Value::Time(val) => {
+                if let Value::Time(other_val) = other {
+                    val == other_val
+                } else {
+                    false
+                }
+            }
+            Value::DateTime(val) => {
+                if let Value::DateTime(other_val) = other {
+                    val == other_val
+                } else {
+                    false
+                }
+            }
+            Value::AnyURI(val) => {
+                if let Value::AnyURI(other_val) = other {
+                    val == other_val
+                } else {
+                    false
+                }
+            }
+            Value::Indeterminate => matches!(other, Value::Indeterminate),
+        }
     }
 }
-impl From<f64> for EqF64 {
-    fn from(value: f64) -> Self {
-        EqF64(value)
-    }
-}
-
-impl FromStr for EqF64 {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        s.parse::<f64>().map(EqF64).map_err(|_| ())
-    }
-}
-
-impl Deref for EqF64 {
-    type Target = f64;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
 
 /// 5.32 OblicationsType definition
 /// Contains a set of oblication elements
