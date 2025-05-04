@@ -9,19 +9,29 @@ use crate::utils::*;
 pub struct TargetType {
     #[serde(rename = "AnyOf", skip_serializing_if = "Option::is_none")]
     #[builder(default)]
-    any_of: Option<Vec<AnyOfType>>                  // Data type for elements, of which one must match the context to be applicable; if empty, the target is always applicable; might be changed to a simple vec, that can also be of length 0
+    pub (super) any_of: Option<Vec<AnyOfType>>                  // Data type for elements, of which one must match the context to be applicable; if empty, the target is always applicable; might be changed to a simple vec, that can also be of length 0
 }
 
+
 impl TargetType {
-    pub fn match_request(&self, request: &RequestType) -> Result<bool, XacmlError> {
-        if self.any_of.is_none() {
-            return Ok(true);
+    pub fn match_request(&self, request: &RequestType) -> Result<TargetResult, XacmlError> {
+        if self.any_of.is_none() || self.any_of.as_ref().unwrap().is_empty() {       // Should not fail because of lazy evaluation
+            return Ok(TargetResult::Match);
         }
-        for any_of in self.any_of.as_ref().unwrap() {   // safe to unwrap as we checked for none
-            if !any_of.match_request(request)? {                    // 5.6: "The <Target> element SHALL contain a conjunctive sequence of <AnyOf> elements"
-                return Ok(false);
-            }
-        };
-        Ok(true)
+        let any_of_results = self.any_of.as_ref().unwrap().iter()
+            .map(|r| r.match_request(request))
+            .collect::<Result<Vec<TargetResult>, XacmlError>>()?;
+        if any_of_results.iter().all(|r| *r == TargetResult::Match)
+        {
+            return Ok(TargetResult::Match)
+        }
+        else if any_of_results.iter().any(|r| *r == TargetResult::NoMatch)
+        {
+            return Ok(TargetResult::NoMatch);
+        }
+        else 
+        {
+            return Ok(TargetResult::Indeterminate)    
+        }
     }
 }

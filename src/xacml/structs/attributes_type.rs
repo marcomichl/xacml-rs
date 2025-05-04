@@ -46,7 +46,7 @@ impl AttributesType{
             .collect()
     }
 
-    pub fn get_attribute_value_by_selector(&self, selector: &AttributeSelectorType) -> Result<&AttributeValueType, XacmlError> {
+    pub fn get_attribute_values_by_selector(&self, selector: &AttributeSelectorType) -> Result<Vec<&AttributeValueType>, XacmlError> {
         Err(XacmlError::new(XacmlErrorType::NotImplemented, "AttributeSelector not implemented as Content is not implemented".to_string()))
     }
 }

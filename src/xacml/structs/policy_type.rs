@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 use super::*;
 use crate::utils::*;
 
@@ -37,9 +39,9 @@ pub struct PolicyType {
     combiner_parameters: Option<Vec<CombinerParametersType>>,       // own type?
     #[serde(rename = "RuleCombinerParameters", skip_serializing_if = "Option::is_none")]
     #[builder(default)]
-    rule_combiner_parameters: Option<Vec<String>>,  // own type?
+    rule_combiner_parameters: Option<Vec<RuleCombinerParametersType>>,  // own type?
     #[serde(rename = "Target", default, serialize_with = "serialize_target")]
-    target: Vec<TargetType>,
+    target: Option<TargetType>,
     #[serde(rename = "VariableDefinition", skip_serializing_if = "Option::is_none")]
     #[builder(default)]
     variable_definition: Option<Vec<String>>,       // own type?
@@ -54,28 +56,33 @@ pub struct PolicyType {
     
 }
 
-fn serialize_target<S>(targets: &Vec<TargetType>, serializer: S) -> Result<S::Ok, S::Error>
+fn serialize_target<S>(target: &Option<TargetType>, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
 {
-    if targets.is_empty() {
+    if target.is_none() {
         serializer.serialize_str("") 
     } else {
-        targets.serialize(serializer)
+        target.serialize(serializer)
     }
 }
 
 impl PolicyType {
-    pub fn get_target(&self) -> &Vec<TargetType> {
-        &self.target
+
+    pub fn match_request(&self, request: &RequestType) -> Result<TargetResult, XacmlError> {
+        self.target.as_ref().unwrap_or(&TargetType{any_of: None}).match_request(request)
     }
 
-    pub fn match_request(&self, request: &RequestType) -> Result<bool, XacmlError> {
-        for target in &self.target {
-            if target.match_request(request)? {
-                return Ok(true);
-            }
+    pub fn evaluate_policy(&self, request: &RequestType) -> Result<DecisionType, XacmlError> {
+        let mut result: RuleResult ;
+        let mut reason= "Condition";
+        let target_result = self.target.as_ref().unwrap_or(&TargetType{any_of: None}).match_request(request)?;
+        if target_result == TargetResult::NoMatch
+        {
+            result = RuleResult::NotApplicable;
+            reason = "Target";
         }
-        Ok(false)
+        
+        todo!()
     }
 }

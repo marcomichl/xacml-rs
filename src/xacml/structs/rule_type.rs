@@ -30,10 +30,36 @@ pub struct RuleType {
 
 impl RuleType {
     /// 7.11 Rule Evaluation
-    pub (crate) fn evaluate_rule(&self, request: &RequestType) -> Result<DecisionType, XacmlError> {
+    pub (crate) fn evaluate_rule(&self, request: &RequestType) -> Result<RuleResult, XacmlError> {
         // Rule has to evaluate the target and the condition to decide if the effect applies
-        
-
-        return Err(XacmlError::new(XacmlErrorType::NotImplemented, "Rule evaluation not implemented".to_string()));
+        let mut result: RuleResult ;
+        let mut reason= "Condition";
+        let target_result = self.target.as_ref().unwrap_or(&TargetType{any_of: None}).match_request(request)?;
+        if target_result == TargetResult::NoMatch
+        {
+            result = RuleResult::NotApplicable;
+            reason = "Target";
+        }
+        else if target_result == TargetResult::Indeterminate
+        {
+            result = match self.effect {
+                EffectType::Deny => RuleResult::IndetermianteD,
+                EffectType::Permit => RuleResult::IdeterminateP
+            };
+            reason = "Target";
+        }
+        else if self.condition.as_ref().unwrap().evaluate(request)?
+        {
+            result = match self.effect {
+                EffectType::Deny => RuleResult::Deny,
+                EffectType::Permit => RuleResult::Permit
+            };
+        }
+        else {
+            result =RuleResult::NotApplicable;
+        };
+        log(LogLevel::DEBUG, &format!("Rule {} evaluated to {:?} because of {}", self.rule_id, result, reason));
+        return Ok(result)
+        // Todo: Extended Indetermination not yet implemented
     }
 }

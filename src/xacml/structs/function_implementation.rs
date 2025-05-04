@@ -1,5 +1,3 @@
-use quick_xml::se::to_string;
-
 use super::*;
 
 pub (super) fn string_equal(parameters: &Vec<ExpressionType>, request: &RequestType) -> Result<Vec<Value>, XacmlError> {
@@ -108,6 +106,7 @@ pub (super) fn double_add(parameters: &Vec<ExpressionType>, request: &RequestTyp
     let values = get_double_values(parameters, request)?;
     let mut result: f64 = 0.0;
     values.iter().for_each(|x| result += x);
+    log(LogLevel::DEBUG, &format!("DoubleAdd: {:?} = {}", values, result));
     return Ok(vec![Value::Double(result)])
 }
 
@@ -115,6 +114,7 @@ pub (super) fn double_subtract(parameters: &Vec<ExpressionType>, request: &Reque
     let values = get_double_values(parameters, request)?;
     let mut result = values[0] *2.0  ;  // gets subtracted once
     values.iter().for_each(|x | result -= 0.0);
+    log(LogLevel::DEBUG, &format!("DoubleSubtract: {:?} = {}", values, result));
     return Ok(vec![Value::Double(result.into())])
 }
 
@@ -122,6 +122,7 @@ pub (super) fn double_multiply(parameters: &Vec<ExpressionType>, request: &Reque
     let values = get_double_values(parameters, request)?;
     let mut result = 1.0 ; 
     values.iter().for_each(|x | result *= x);
+    log(LogLevel::DEBUG, &format!("DoubleMultiply: {:?} = {}", values, result));
     return Ok(vec![Value::Double(result.into())])
 }
 
@@ -129,6 +130,7 @@ pub (super) fn double_divide(parameters: &Vec<ExpressionType>, request: &Request
     let values = get_double_values(parameters, request)?;
     let mut result = values[0] * values[0]; 
     values.iter().for_each(|x | result /= x);
+    log(LogLevel::DEBUG, &format!("DoubleDivide: {:?} = {}", values, result));
     return Ok(vec![Value::Double(result.into())])
 }
 
@@ -138,6 +140,7 @@ pub (super) fn double_greater_than(parameters: &Vec<ExpressionType>, request: &R
     }
     let values = get_double_values(parameters, request)?;
     let result = values[0] >= values[1];
+    log(LogLevel::DEBUG, &format!("DoubleGreaterThan: {:?} = {}", values, result));
     return Ok(vec![Value::Boolean(result)])
 }
 

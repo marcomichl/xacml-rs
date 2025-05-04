@@ -26,6 +26,7 @@ impl FunctionId {
             FunctionId::DoubleSubtract => return double_subtract(parameters, request),
             FunctionId::DoubleMultiply => return double_multiply(parameters, request),
             FunctionId::DoubleDivide => return double_divide(parameters, request),
+            FunctionId::DoubleGreaterThan => return double_greater_than(parameters, request),
             _ => return Err(XacmlError::new(XacmlErrorType::NotImplemented, "Function not implemented".to_string()))
         }
     }

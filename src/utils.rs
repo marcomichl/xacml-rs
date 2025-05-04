@@ -74,5 +74,15 @@ impl Display for XacmlError {
     }
 }
 
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
+pub enum LogLevel {
+    DEBUG,
+    WARN,
+    ERROR
+}
 
-
+pub fn log(level: LogLevel, msg: &str) {
+    if level >= LogLevel::DEBUG{    // Later: use a config parameter here
+        println!("{}", msg)
+    }
+}

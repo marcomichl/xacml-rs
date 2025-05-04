@@ -6,7 +6,7 @@ use crate::pap::get_policy_from_context;
 pub fn decide_request(request: RequestType, context: &str) -> Result<ResponseType, XacmlError> {
     let policy: PolicyType = get_policy_from_context(context)?;
     // verify that the policy is applicable
-    if !policy.match_request(&request)? {
+    if policy.match_request(&request)? != TargetResult::Match {
         return ResponseTypeBuilder::default()
             .result(
                 vec![ResultTypeBuilder::default()

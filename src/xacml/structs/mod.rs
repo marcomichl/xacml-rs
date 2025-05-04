@@ -20,6 +20,9 @@ mod function_type;
 mod function_implementation;
 mod attribute_value_type;
 mod attribute_designator_type;
+mod decision_type;
+mod rule_result;
+mod target_results;
 
 use core::str;
 use std::{ops::Deref, str::FromStr};
@@ -50,6 +53,9 @@ pub use apply_type::*;
 pub use function_type::*;
 pub use attribute_value_type::*;
 pub use attribute_designator_type::*;   
+pub use decision_type::*;
+pub use rule_result::*;
+pub use target_results::*;
 
 use super::enums::{combining_algorithms::{PolicyCombiningAlgorithms, RuleCombiningAlgorithms}, data_types::DataType, *};
 
@@ -283,14 +289,6 @@ pub struct VariableReferenceType {
     #[serde(rename = "VariableId")]
     variable_id: String
 }
-
-
-
-
-
-
-
-   
 
 
 /// 5.30 AttributeSelectorType definition
@@ -564,22 +562,6 @@ pub struct PolicyIdentifierListType {
     #[builder(default)]
     policy_set_id_reference: Option<Vec<PolicySetIdReferenceType>>
 }
-
-/// 5.50 - 5.52 are optional and skipped
-/// 5.53 DecisionType
-/// Enumeration to indicate the decision of a policy
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
-pub enum DecisionType {
-    Permit,
-    Deny,
-    Indeterminate,
-    NotApplicable
-}
-
-
-
-
-
 
 /// 5.57 StatusDetailType
 /// Contains the status detail of a decision request

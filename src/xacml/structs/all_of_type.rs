@@ -11,12 +11,26 @@ pub struct AllOfType {
 }
 
 impl AllOfType {
-    pub fn match_request(&self, request: &RequestType) -> Result<bool, XacmlError> {
-        for match_type in &self._match {
-            if !match_type.match_request(request)? {
-                return Ok(false);
-            }
+    pub fn match_request(&self, request: &RequestType) -> Result<TargetResult, XacmlError> {
+        if self._match.is_empty() {
+            return Err(XacmlError::new(XacmlErrorType::FormatError, "AllOf type contains no match elements".to_string()))
         }
-        Ok(true)
+        let match_results = self._match.iter()
+            .map(|m| m.match_request(request))
+            .collect::<Result<Vec<TargetResult>, XacmlError>>()?;   // uses the FromIterator trait included in Result
+        if match_results.iter()
+            .all(|r| *r == TargetResult::Match) 
+        {
+            return Ok(TargetResult::Match)
+        }
+        else if match_results.iter()
+            .any(|r| *r == TargetResult::NoMatch)
+        {
+            return Ok(TargetResult::NoMatch)
+        }
+        else 
+        {
+            return Ok(TargetResult::Indeterminate)
+        }
     }
 }

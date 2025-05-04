@@ -1,5 +1,7 @@
-use std::str::FromStr;
+use std::{fmt, str::FromStr};
 use serde::{Serialize, Serializer, Deserialize, Deserializer};
+
+use crate::{utils::XacmlError, xacml::structs::DecisionType};
 
 /// 10.2.3 Algorithm definition
 #[allow(dead_code)] 
@@ -54,6 +56,28 @@ impl RuleCombiningAlgorithms {
             .map(|(_, v)| *v)
             .unwrap()   // This should never happen as we have a complete mapping
     }
+
+    pub fn apply(&self, results: &Vec<DecisionType>) -> Result<DecisionType, XacmlError> {
+        match self {
+            RuleCombiningAlgorithms::DenyOverrides => return deny_overrides(results),
+            _ => return Err(XacmlError::new(crate::utils::XacmlErrorType::NotImplemented, format!("RuleCombiningAlgorithm {} not yet implemented!", self.to_string())))
+        }
+    }
+}
+
+/// Following Appendix C.2 for deny-overrides
+/// Does not yet implement the more complex ideterminate types
+fn deny_overrides(results: &Vec<DecisionType>) -> Result<DecisionType, XacmlError> {
+    if results.iter().any(|f| f == &DecisionType::Deny) {
+        return Ok(DecisionType::Deny)
+    }
+    if results.iter().any(|f| f == &DecisionType::Indeterminate) {
+        return Ok(DecisionType::Indeterminate)
+    }
+    if results.iter().any(|f| f == &DecisionType::Permit) {
+        return Ok(DecisionType::Permit)
+    }
+    return Ok(DecisionType::NotApplicable)
 }
 
 impl Serialize for RuleCombiningAlgorithms {
@@ -72,6 +96,12 @@ impl<'de> Deserialize<'de> for RuleCombiningAlgorithms {
     {
         let s: &str = Deserialize::deserialize(deserializer)?;
         RuleCombiningAlgorithms::from_str(s).map_err( |_| serde::de::Error::custom("invalid RuleCombiningAlgorithm URI"))
+    }
+}
+
+impl fmt::Display for RuleCombiningAlgorithms {
+    fn fmt (&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.to_string())
     }
 }
 
@@ -145,6 +175,12 @@ impl<'de> Deserialize<'de> for PolicyCombiningAlgorithms {
     {
         let s: &str = Deserialize::deserialize(deserializer)?;
         PolicyCombiningAlgorithms::from_str(s).map_err( |_| serde::de::Error::custom("invalid function URI"))
+    }
+}
+
+impl fmt::Display for PolicyCombiningAlgorithms {
+    fn fmt (&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.to_string())
     }
 }
 

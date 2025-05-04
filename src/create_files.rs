@@ -18,7 +18,7 @@ fn create_policy(){
         .version(VersionType("0.1".to_string()))
         .rule_combining_alg_id(RuleCombiningAlgorithms::DenyOverrides)
         .description("Example policy")
-        .target(Vec::<TargetType>::new())
+        .target(TargetTypeBuilder::default().build().unwrap())
         .rule(
             vec![
                     RuleTypeBuilder::default()
@@ -36,7 +36,7 @@ fn create_policy(){
                                                     ._match(
                                                         vec![
                                                             MatchTypeBuilder::default()
-                                                                .match_id("urn:oasis:names:tc:xacml:1.0:function:string-equal")
+                                                                .match_id(FunctionId::StringEqual)
                                                                 .attribute_value(AttributeValueTypeBuilder::default()
                                                                     .data_type(DataType::String)
                                                                     .value(Value::String("employee".to_string()))

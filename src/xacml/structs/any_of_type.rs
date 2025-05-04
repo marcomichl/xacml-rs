@@ -1,6 +1,4 @@
 use crate::utils::*;
-
-
 use super::*;
 
 /// 5.7 AnyOf element
@@ -13,12 +11,26 @@ pub struct AnyOfType {
 }
 
 impl AnyOfType {
-    pub fn match_request(&self, request: &RequestType) -> Result<bool, XacmlError> {
-        for all_of in &self.all_of {
-            if all_of.match_request(request)? {
-                return Ok(true);
-            }
+    pub fn match_request(&self, request: &RequestType) -> Result<TargetResult, XacmlError> {
+        if self.all_of.is_empty() {
+            return Err(XacmlError::new(XacmlErrorType::FormatError, "AnyOf type contains no AllOf elements".to_string()))
         }
-        Ok(false)
+        let all_of_results = self.all_of.iter()
+            .map(|a| a.match_request(request))
+            .collect::<Result<Vec<TargetResult>, XacmlError>>()?;
+        if all_of_results.iter()
+            .any(|r| *r == TargetResult::Match)
+        {
+            return Ok(TargetResult::Match)
+        }
+        else if all_of_results.iter()
+            .all(|r| *r == TargetResult::NoMatch)
+        {
+            return Ok(TargetResult::NoMatch)
+        }
+        else 
+        {
+            return Ok(TargetResult::Indeterminate)    
+        }
     }
 }
