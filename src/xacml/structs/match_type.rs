@@ -23,8 +23,7 @@ impl MatchType{
     /// Has to be rewritten according to 7.6 (Match Evaluation)
     /// There are more functions that "simple" string match, comparable to the functions in Apply structures..
     pub fn match_request(&self, request: &RequestType) -> Result<TargetResult, XacmlError> {
-        let match_attribute = &self.attribute_value;
-        let req_attributes = 
+        let request_attribute_value_results = 
         if self.attribute_designator.is_some() && self.attribute_selector.is_none(){
             request.attributes.iter()
                 .map(|attributes| attributes.get_attribute_values_by_designator(self.attribute_designator.as_ref().unwrap()))
@@ -39,23 +38,36 @@ impl MatchType{
             return Err(XacmlError::new(XacmlErrorType::FormatError, "MatchType does not contain a valid attribute designator or selector, or both are defined".to_string()))
         };
         // Operational Errors -> Ideterminate
-        if req_attributes.iter().any(|r| r.is_err()) {
+        if request_attribute_value_results.iter().any(|r| r.is_err()) {
             return Ok(TargetResult::Indeterminate)
         }
-        let req_attributes_values = req_attributes.into_iter()
+        // at this point, we have the necessary attribute values from the request
+        let request_attribute_values = request_attribute_value_results.into_iter()
             .map(|r| r.unwrap())
             .flatten()
             .collect::<Vec<&AttributeValueType>>();
-        // Empty req_attributes bags -> NoMatch
-        if req_attributes_values.is_empty() {
+        // Designator and Selector did not bring a result
+        if request_attribute_values.is_empty() {
             return Ok(TargetResult::NoMatch)
         }
+        
         // One Match -> Match
-        if req_attributes_values.iter().any(|v| *v == match_attribute) {
+
+        //todo: Application of the function in match_id, verify that return type is bool, error -> indeterminate
+        let request_values: Vec<&Value> = request_attribute_values.into_iter().map(|v| &v.value).collect();
+        
+        let match_results: Vec<Result<Vec<Value>, XacmlError>> = request_values.into_iter().map(|r| self.match_id.apply_function(vec![&self.attribute_value.value, r])).collect();
+        // This should only return one value per applied function, and that should be of type boolean
+        if match_results.iter().any(|r| r.is_err()) {
+            return Ok(TargetResult::Indeterminate)
+        }
+        let match_result_values: Vec<Value> = match_results.into_iter().flatten().flatten().collect();
+        if match_result_values.iter().any(|r| match r {
+            Value::Boolean(b) => return *b,
+            _ => return false
+        }) {
             return Ok(TargetResult::Match)
         }
-        // One Indeterminate -> Indeterminate (in case of an error, see above
-        // All False -> NoMatch
         Ok(TargetResult::NoMatch)   //Did not find the attribute
     }
 }
@@ -161,8 +173,8 @@ mod test_match_type {
                     .attribute_id("Test-ID")
                     .include_in_result(false)
                     .attribute_value(vec![AttributeValueTypeBuilder::default()
-                        .data_type(DataType::Double)
-                        .value(Value::Integer(23))  //Should not happen, for test purpose..
+                        .data_type(DataType::Integer)
+                        .value(Value::Double(23.0))  //Should not happen, for test purpose..
                         .build()
                         .unwrap()    
                         ])
@@ -186,9 +198,9 @@ mod test_match_type {
             .build().unwrap();
 
         assert_eq!(match_type.match_request(&request1).unwrap(), TargetResult::Match);
-        assert_eq!(match_type.match_request(&request2).unwrap(), TargetResult::NoMatch);
-        assert_eq!(match_type.match_request(&request3).unwrap(), TargetResult::NoMatch);
-        assert_eq!(match_type.match_request(&request4).unwrap(), TargetResult::NoMatch);
-        assert_eq!(match_type.match_request(&request5).unwrap(), TargetResult::NoMatch);
+        assert_eq!(match_type.match_request(&request2).unwrap(), TargetResult::NoMatch);    // Only wrong evaluation
+        assert_eq!(match_type.match_request(&request3).unwrap(), TargetResult::NoMatch);    // Designator returns empty bag (Id)
+        assert_eq!(match_type.match_request(&request4).unwrap(), TargetResult::NoMatch);    // Designator returns empty bag (Category)
+        assert_eq!(match_type.match_request(&request5).unwrap(), TargetResult::Indeterminate);  //Wrong data type given to function
     }
 }   

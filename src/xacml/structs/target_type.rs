@@ -5,7 +5,7 @@ use crate::utils::*;
 /// Shall contain a conjunctive sequence of <AnyOf> elements, to be applicable one of these has to match the decision request.
 /// Each AnyOf element contains a disjunctive AllOf element, that all have to match the decision request.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Builder)]
-#[builder(pattern = "owned", setter(strip_option))]
+#[builder(pattern = "owned", setter(into, strip_option))]
 pub struct TargetType {
     #[serde(rename = "AnyOf", skip_serializing_if = "Option::is_none")]
     #[builder(default)]

@@ -40,7 +40,8 @@ pub struct PolicyType {
     #[serde(rename = "RuleCombinerParameters", skip_serializing_if = "Option::is_none")]
     #[builder(default)]
     rule_combiner_parameters: Option<Vec<RuleCombinerParametersType>>,  // own type?
-    #[serde(rename = "Target", default, serialize_with = "serialize_target")]
+    #[serde(rename = "Target", serialize_with = "serialize_target")]
+    #[builder(default)]
     target: Option<TargetType>,
     #[serde(rename = "VariableDefinition", skip_serializing_if = "Option::is_none")]
     #[builder(default)]
