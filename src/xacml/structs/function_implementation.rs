@@ -98,7 +98,7 @@ pub (super) fn double_subtract(parameters: &Vec<&Value>) -> Result<Vec<Value>, X
         })
         .collect::<Result<Vec<&f64>, XacmlError>>()?;
     let mut result = values[0] *2.0  ;  // gets subtracted once
-    values.iter().for_each(|x | result -= 0.0);
+    values.iter().for_each(|x | result -= *x);
     log(LogLevel::DEBUG, &format!("DoubleSubtract: {:?} = {}", values, result));
     return Ok(vec![Value::Double(result.into())])
 }
@@ -144,18 +144,6 @@ pub (super) fn double_greater_than(parameters: &Vec<&Value>) -> Result<Vec<Value
 }
 
 
-fn get_integer_values(parameters: &Vec<ExpressionType>, request: &RequestType) -> Result<Vec<i64>, XacmlError> {
-    let mut values: Vec<i64> = [].to_vec();
-    for parameter in parameters {
-        let value = parameter.evaluate(request)?;
-        match (&value[0]) {
-            (Value::Integer(int)) => values.push(*int),
-            _ => return Err(XacmlError::new(XacmlErrorType::ProcessingError, "Integer-based function requires only integer parameters".to_string()))
-        }
-    };
-    return Ok(values)
-}
-
 fn check_parameter_type(parameters: &Vec<Value>, expected_type: &Value) -> bool {
     parameters.iter().all(|v| std::mem::discriminant(v) == std::mem::discriminant(expected_type))
 }
@@ -165,30 +153,85 @@ mod function_implementation_test {
     use super::*;
 
     #[test]
-    fn integer_add_test() {
-        let parameters = vec![&Value::Integer(23), &Value::Integer(27)];
-        let result = integer_add(&parameters).unwrap();
-        assert_eq!(1, result.len());
-        assert_eq!(result[0], Value::Integer(50));
+    fn string_equal_test() {
+        let parameters = vec![Value::String("String".to_string()), Value::String("String".to_string())];
+        let parameters2 = vec![Value::String("String".to_string()), Value::String("AnotherString".to_string())];
+        let result = string_equal(&parameters.iter().collect()).unwrap();
+        let result2 = string_equal(&parameters2.iter().collect()).unwrap();
+        assert_eq!(result, vec![Value::Boolean(true)]);
+        assert_eq!(result2, vec![Value::Boolean(false)]);
+    }
+
+    #[test]
+    fn boolean_equal_test() {
+        let parameters = vec![&Value::Boolean(true), &Value::Boolean(true)];
+        let parameters2 = vec![&Value::Boolean(true), &Value::Boolean(false)];
+        let result = boolean_equal(&parameters).unwrap();
+        let result2 = boolean_equal(&parameters2).unwrap();
+        assert_eq!(result, vec![Value::Boolean(true)]);
+        assert_eq!(result2, vec![Value::Boolean(false)]);
     }
 
     #[test]
     fn integer_equal_test() {
-        let parameters = vec![&Value::Integer(23), &Value::Integer(27)];
-        let parameters2 = vec![&Value::Integer(23), &Value::Integer(23)];
+        let parameters = vec![&Value::Integer(45), &Value::Integer(45)];
+        let parameters2 = vec![&Value::Integer(45), &Value::Integer(58)];
         let result = integer_equal(&parameters).unwrap();
         let result2 = integer_equal(&parameters2).unwrap();
-        assert_eq!(1, result.len());
-        assert_eq!(1, result2.len());
-        assert_eq!(result[0], Value::Boolean(false));
-        assert_eq!(result2[0], Value::Boolean(true));
+        assert_eq!(result, vec![Value::Boolean(true)]);
+        assert_eq!(result2, vec![Value::Boolean(false)]);
+    }
+
+    #[test]
+    fn double_equal_test() {
+        let parameters = vec![&Value::Double(45.), &Value::Double(45.)];
+        let parameters2 = vec![&Value::Double(45.), &Value::Double(45.1)];
+        let result = double_equal(&parameters).unwrap();
+        let result2 = double_equal(&parameters2).unwrap();
+        assert_eq!(result, vec![Value::Boolean(true)]);
+        assert_eq!(result2, vec![Value::Boolean(false)]);
+    }
+
+    #[test]
+    fn integer_add_test() {
+        let parameters = vec![&Value::Integer(23), &Value::Integer(27)];
+        let result = integer_add(&parameters).unwrap();
+        assert_eq!(result, vec![Value::Integer(50)]);
+    }
+
+    #[test]
+    #[should_panic]
+    fn integer_add_fail() {
+        let parameters = vec![&Value::Integer(23), &Value::Double(27.0)];
+        integer_add(&parameters).unwrap();
     }
 
     #[test]
     fn double_add_test() {
         let parameters = vec![&Value::Double(22.9), &Value::Double(27.1)];
         let result = double_add(&parameters).unwrap();
-        assert_eq!(1, result.len());
-        assert_eq!(result[0], Value::Double(50.0));
+        assert_eq!(result, vec![Value::Double(50.0)]);
     }
+
+    #[test]
+    fn double_subtract_test() {
+        let parameters = vec![&Value::Double(22.), &Value::Double(21.)];
+        let result = double_subtract(&parameters).unwrap();
+        assert_eq!(result, vec![Value::Double(1.)]);
+    }
+
+    #[test]
+    fn double_multiply_test() {
+        let parameters = vec![&Value::Double(22.9), &Value::Double(27.1)];
+        let result = double_multiply(&parameters).unwrap();
+        assert_eq!(result, vec![Value::Double(620.59)]);
+    }
+
+    #[test]
+    fn double_divide_test() {
+        let parameters = vec![&Value::Double(34.5), &Value::Double(3.)];
+        let result = double_divide(&parameters).unwrap();
+        assert_eq!(result, vec![Value::Double(11.5)]);
+    }
+
 }
