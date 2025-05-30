@@ -89,7 +89,6 @@ fn test_evaluate_simple_policy(){
                         ])
                     .build().unwrap()
             ])
-        .multi_requests(UnimplementedField(None))
         .build().unwrap();
     let response = pdp::decide_request(request, "policy01.xml").unwrap();
     println!("{:?}", response);
