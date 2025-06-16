@@ -6,8 +6,6 @@ use crate::xacml::structs::RuleTypeBuilder;
 use super::*;
 #[allow(unused_imports)]
 use crate::xacml::structs::*;
-#[allow(unused_imports)]
-use crate::xacml::enums::{combining_algorithms::*, data_types::*};
 
 
 #[test]

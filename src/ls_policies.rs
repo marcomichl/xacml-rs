@@ -1,5 +1,4 @@
 use crate::xacml::structs::*;
-use crate::xacml::enums::{data_types::DataType, *};
 use crate::utils::*;
 
 #[test]
@@ -7,6 +6,22 @@ use crate::utils::*;
 fn store_policy() {
     let policy = create_policy();
     serialize_to_xml_file(&policy, "sl_policy.xml").unwrap();
+}
+
+#[test]
+#[ignore = "Create file for paper use"]
+fn store_attribute(){
+    let attribute =  AttributeTypeBuilder::default()
+        .attribute_id("object.belief")
+        .include_in_result(false)
+        .attribute_value(vec![
+            AttributeValueTypeBuilder::default()
+                .data_type(DataType::Double)
+                .value(Value::Double(0.1.into()))
+                .build().unwrap() // AttributeValue
+        ]) // vec attribute_value
+        .build().unwrap(); // AttributeType
+    serialize_to_xml_file(&attribute, "sl_request_attribute.xml");
 }
 
 #[test]
@@ -22,8 +37,27 @@ fn create_policy() -> PolicyType {
     PolicyTypeBuilder::default()
         .policy_id("sl_check_projected_probability")
         .version(VersionType("0.1".to_string()))
-        .rule_combining_alg_id(RuleCombiningAlgorithms::DenyOverrides)
+        .rule_combining_alg_id(RuleCombiningAlgorithms::DenyUnlessPermit)
         .description("Checks if the projected probability matches the required value")
+        .target(TargetTypeBuilder::default()
+            .any_of(vec![AnyOfTypeBuilder::default()
+                .all_of(vec![AllOfTypeBuilder::default()
+                        ._match(vec![MatchTypeBuilder::default()
+                            .attribute_value(AttributeValueTypeBuilder::default()
+                                .data_type(DataType::String)
+                                .value(Value::String("vehicle_cam_acceptance".to_string()))
+                                .build().unwrap()) //AttributeValueTypeBuilder
+                            .attribute_designator(AttributeDesignatorTypeBuilder::default()
+                                .attribute_id("request_context")
+                                .data_type(DataType::String)
+                                .category("request_parameter")
+                                .must_be_present(true)
+                                .build().unwrap()) //AttributeDesignatorTypeBuilder    
+                            .match_id(FunctionId::StringEqual)
+                            .build().unwrap()]) // MatchTypeBuilder
+                    .build().unwrap()])// AllOfTypeBuilder
+                .build().unwrap()])  // AnyOfTypeBuilder
+            .build().unwrap()) //TargetTypeBuilder
         .rule(vec![
             RuleTypeBuilder::default()
                 .rule_id("calculate_check_projected_probability")
@@ -131,4 +165,86 @@ fn create_request() -> RequestType {
                 .build().unwrap() // AttributeType
         ]) //vec attributes
         .build().unwrap() // RequestType
+}
+
+#[test]
+#[ignore = "Used for paper"]
+fn create_discounting_belief_file() {
+    let expression = create_discounting_belief();
+    serialize_to_xml_file(&expression, "Expression_discount_belief.xml");
+}
+
+fn create_discounting_belief() -> ExpressionType {
+    ExpressionType::Apply(
+        ApplyTypeBuilder::default()
+            .function_id(FunctionId::DoubleMultiply)
+            .description("Calculate data-based belief value")
+            .expression(vec![
+                ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
+                    .attribute_id("node_trust_projected_probability")
+                    .data_type(DataType::Double)
+                    .category("subject")
+                    .must_be_present(true)
+                    .build().unwrap()),
+                ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
+                    .attribute_id("data_trust_belief")
+                    .data_type(DataType::Double)
+                    .category("subject")
+                    .must_be_present(true)
+                    .build().unwrap())
+            ])
+        .build().unwrap()
+        )
+}
+
+#[test]
+#[ignore = "Used for paper"]
+fn create_discounting_uncertainty_file() {
+    let expression = create_discounting_uncertainty();
+    serialize_to_xml_file(&expression, "Expression_discount_uncertainty.xml");
+}
+
+fn create_discounting_uncertainty() -> ExpressionType {
+    ExpressionType::Apply(
+        ApplyTypeBuilder::default()
+            .function_id(FunctionId::DoubleSubtract)
+            .description("Calculate data-based uncertainty value")
+            .expression(vec![
+                ExpressionType::AttributeValue(
+                    AttributeValueTypeBuilder::default()
+                        .data_type(DataType::Double)
+                        .value(Value::Double(1.0))
+                        .build().unwrap() // AttributeValue
+                ), // AttributeValue
+                ExpressionType::Apply(
+                    ApplyTypeBuilder::default()
+                        .function_id(FunctionId::DoubleMultiply)
+                        .description("Multiply supporting belief with projected probability")
+                        .expression(vec![
+                            ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
+                                .attribute_id("node_trust_projected_probability")
+                                .data_type(DataType::Double)
+                                .category("subject")
+                                .must_be_present(true)
+                                .build().unwrap()),
+                            ExpressionType::Apply(
+                                ApplyTypeBuilder::default()
+                                    .function_id(FunctionId::DoubleAdd)
+                                    .description("Sum up belief in x=X to calculate uncertainty")
+                                    .expression(vec![
+                                        ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
+                                            .attribute_id("Belief supporting trust in data")
+                                            .data_type(DataType::Double)
+                                            .category("subject")
+                                            .must_be_present(true)
+                                            .build().unwrap())
+                            ])
+                        .build().unwrap()
+                        )
+                    ])
+                .build().unwrap()
+                )
+            ])
+        .build().unwrap()
+        )
 }

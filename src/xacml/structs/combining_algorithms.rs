@@ -1,7 +1,8 @@
 use std::{fmt, str::FromStr};
 use serde::{Serialize, Serializer, Deserialize, Deserializer};
 
-use crate::{utils::XacmlError, xacml::structs::DecisionType};
+use super::*;
+use crate::utils::XacmlError;
 
 /// 10.2.3 Algorithm definition
 #[allow(dead_code)] 
@@ -57,7 +58,7 @@ impl RuleCombiningAlgorithms {
             .unwrap()   // This should never happen as we have a complete mapping
     }
 
-    pub fn apply(&self, results: &Vec<DecisionType>) -> Result<DecisionType, XacmlError> {
+    pub fn apply(&self, results: &Vec<RuleResult>, parameters: &Option<Vec<RuleCombinerParametersType>>) -> Result<PolicyResult, XacmlError> {
         match self {
             RuleCombiningAlgorithms::DenyOverrides => return deny_overrides(results),
             _ => return Err(XacmlError::new(crate::utils::XacmlErrorType::NotImplemented, format!("RuleCombiningAlgorithm {} not yet implemented!", self.to_string())))
@@ -66,18 +67,28 @@ impl RuleCombiningAlgorithms {
 }
 
 /// Following Appendix C.2 for deny-overrides
-/// Does not yet implement the more complex ideterminate types
-fn deny_overrides(results: &Vec<DecisionType>) -> Result<DecisionType, XacmlError> {
-    if results.iter().any(|f| f == &DecisionType::Deny) {
-        return Ok(DecisionType::Deny)
+fn deny_overrides(results: &Vec<RuleResult>) -> Result<PolicyResult, XacmlError> {
+    if results.iter().any(|f| f == &RuleResult::Deny) {
+        return Ok(PolicyResult::Deny)
     }
-    if results.iter().any(|f| f == &DecisionType::Indeterminate) {
-        return Ok(DecisionType::Indeterminate)
+    if results.iter().any(|f| f == &RuleResult::IndeterminateDP) {
+        return Ok(PolicyResult::IndeterminateDP)
     }
-    if results.iter().any(|f| f == &DecisionType::Permit) {
-        return Ok(DecisionType::Permit)
+    if results.iter().any(|f| f == &RuleResult::IndetermianteD) && 
+        (results.iter().any(|f| f == &RuleResult::IndeterminateP) || 
+        results.iter().any(|f| f == &RuleResult::Permit)) {
+        return Ok(PolicyResult::IndeterminateDP)
     }
-    return Ok(DecisionType::NotApplicable)
+    if results.iter().any(|f| f == &RuleResult::IndetermianteD) {
+        return Ok(PolicyResult::IndetermianteD)
+    }
+    if results.iter().any(|f| f == &RuleResult::Permit) {
+        return Ok(PolicyResult::Permit)
+    }
+    if results.iter().any(|f| f == &RuleResult::IndeterminateP) {
+        return Ok(PolicyResult::IndeterminateP)
+    }
+    return Ok(PolicyResult::NotApplicable)
 }
 
 impl Serialize for RuleCombiningAlgorithms {

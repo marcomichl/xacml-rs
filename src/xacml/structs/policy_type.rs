@@ -74,16 +74,31 @@ impl PolicyType {
         self.target.as_ref().unwrap_or(&TargetType{any_of: None}).match_request(request)
     }
 
-    pub fn evaluate_policy(&self, request: &RequestType) -> Result<DecisionType, XacmlError> {
-        let mut result: RuleResult ;
-        let mut reason= "Condition";
+    pub fn evaluate_policy(&self, request: &RequestType) -> Result<PolicyResult, XacmlError> {
         let target_result = self.target.as_ref().unwrap_or(&TargetType{any_of: None}).match_request(request)?;
-        if target_result == TargetResult::NoMatch
-        {
-            result = RuleResult::NotApplicable;
-            reason = "Target";
+        return match target_result {
+            TargetResult::NoMatch => {
+                log(LogLevel::DEBUG, &format!("Policy {} did not match target, NotApplicable", self.policy_id));
+                Ok(PolicyResult::NotApplicable)
+            },
+            TargetResult::Indeterminate => {
+                let rule_results = self.rule.iter()
+                        .map(|r| r.evaluate_rule(request)).collect::<Result<Vec<RuleResult>, XacmlError>>()?;
+                let return_value = self.rule_combining_alg_id.apply(&rule_results, &self.rule_combiner_parameters)?;
+                log(LogLevel::DEBUG, &format!("Policy {} target evaluation ideterminate, {:?}", self.policy_id, return_value));
+                Ok(match return_value {
+                    PolicyResult::Deny => PolicyResult::IndetermianteD,
+                    PolicyResult::Permit => PolicyResult::IndeterminateP,
+                    _ => return_value
+                })
+            },
+            TargetResult::Match => {
+                let rule_results = self.rule.iter()
+                        .map(|r| r.evaluate_rule(request)).collect::<Result<Vec<RuleResult>, XacmlError>>()?;
+                let return_value = self.rule_combining_alg_id.apply(&rule_results, &self.rule_combiner_parameters)?;
+                log(LogLevel::DEBUG, &format!("Policy {} target evaluation ideterminate, {:?}", self.policy_id, return_value));
+                Ok(return_value)
+            }
         }
-        
-        todo!()
     }
 }

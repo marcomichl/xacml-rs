@@ -2,13 +2,12 @@
 #![allow(dead_code)]
 // Disable unused import warnings for tests
 #[cfg(test)]
-use super::{PolicyType, RequestType, ResponseType, PolicySetType, PolicySetTypeBuilder, PolicyIssuerTypeBuilder, TargetTypeBuilder, VersionType};
+use super::{PolicyType, RequestType, ResponseType, PolicySetType, PolicySetTypeBuilder, PolicyIssuerTypeBuilder, TargetTypeBuilder, VersionType, RuleCombiningAlgorithms, PolicyCombiningAlgorithms};
 use quick_xml::{de::from_str, se::to_string};
 use std::fs;
 use std::path::PathBuf;
 use std::env;
 use serde::{Serialize, Deserialize};
-use crate::xacml::enums::combining_algorithms::PolicyCombiningAlgorithms;
 
 #[test]
 fn test_simple_policy() {

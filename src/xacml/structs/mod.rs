@@ -22,7 +22,10 @@ mod attribute_value_type;
 mod attribute_designator_type;
 mod decision_type;
 mod rule_result;
+mod policy_result;
 mod target_results;
+mod combining_algorithms;
+mod data_types;
 
 use core::str;
 use std::{ops::Deref, str::FromStr};
@@ -55,9 +58,11 @@ pub use attribute_value_type::*;
 pub use attribute_designator_type::*;   
 pub use decision_type::*;
 pub use rule_result::*;
+pub use policy_result::*;
 pub use target_results::*;
+pub use combining_algorithms::{RuleCombiningAlgorithms, PolicyCombiningAlgorithms};
+pub use data_types::*;
 
-use super::enums::{combining_algorithms::{PolicyCombiningAlgorithms, RuleCombiningAlgorithms}, data_types::DataType, *};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Builder)]
 #[builder(pattern = "owned", setter(into, strip_option))]

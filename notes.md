@@ -17,3 +17,5 @@ Therefore, the xml-files would be serialized and deserialized in the test cases,
 Adapt function implementations so that only Vec<Value> is given to them (retrieving the correct values is not handled in the function implementation, as this signature is necessary in the match_type)
 And think about how the Vec<Value> can be created in the match_type..
 Then the result of the applied function has to be verified to be boolean -> result of match can be returned
+
+Implement Identifiers for categories etc.: 10.2.6 and B.2 Categories

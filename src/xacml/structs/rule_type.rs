@@ -30,36 +30,37 @@ pub struct RuleType {
 
 impl RuleType {
     /// 7.11 Rule Evaluation
-    pub (crate) fn evaluate_rule(&self, request: &RequestType) -> Result<RuleResult, XacmlError> {
-        // Rule has to evaluate the target and the condition to decide if the effect applies
-        let mut result: RuleResult ;
-        let mut reason= "Condition";
+    pub (super) fn evaluate_rule(&self, request: &RequestType) -> Result<RuleResult, XacmlError> {
         let target_result = self.target.as_ref().unwrap_or(&TargetType{any_of: None}).match_request(request)?;
-        if target_result == TargetResult::NoMatch
-        {
-            result = RuleResult::NotApplicable;
-            reason = "Target";
+       
+        return match target_result {
+            TargetResult::NoMatch => {
+                log(LogLevel::DEBUG, &format!("Rule {} did not match target, NotApplicable", self.rule_id));
+                Ok(RuleResult::NotApplicable)
+            },
+            TargetResult::Indeterminate => {
+                let return_value = match self.effect {
+                    EffectType::Deny => RuleResult::IndetermianteD,
+                    EffectType::Permit => RuleResult::IndeterminateP
+                };
+                log(LogLevel::DEBUG, &format!("Rule {} target evaluation indeterminate, {:?}", self.rule_id, &return_value));
+                Ok(return_value)
+            },
+            TargetResult::Match => {
+                match self.condition.as_ref().unwrap().evaluate(request)? {
+                    true => {
+                        log(LogLevel::DEBUG, &format!("Rule {} match target and condition, {:?}", self.rule_id, self.effect));
+                        match self.effect {
+                            EffectType::Deny =>  Ok(RuleResult::Deny),
+                            EffectType::Permit =>  Ok(RuleResult::Permit)
+                        }
+                    },
+                    false => {
+                        log(LogLevel::DEBUG, &format!("Rule {} match target but not condition, NotApplicable", self.rule_id));
+                        Ok(RuleResult::NotApplicable)
+                    }
+                }
+            }
         }
-        else if target_result == TargetResult::Indeterminate
-        {
-            result = match self.effect {
-                EffectType::Deny => RuleResult::IndetermianteD,
-                EffectType::Permit => RuleResult::IdeterminateP
-            };
-            reason = "Target";
-        }
-        else if self.condition.as_ref().unwrap().evaluate(request)?
-        {
-            result = match self.effect {
-                EffectType::Deny => RuleResult::Deny,
-                EffectType::Permit => RuleResult::Permit
-            };
-        }
-        else {
-            result =RuleResult::NotApplicable;
-        };
-        log(LogLevel::DEBUG, &format!("Rule {} evaluated to {:?} because of {}", self.rule_id, result, reason));
-        return Ok(result)
-        // Todo: Extended Indetermination not yet implemented
     }
 }

@@ -43,7 +43,6 @@ impl AttributeType{
 
 #[cfg(test)]
 mod attribute_type_test {
-    use std::sync::Arc;
     use super::*;
 
     #[test]
