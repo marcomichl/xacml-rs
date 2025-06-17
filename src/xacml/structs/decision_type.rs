@@ -17,7 +17,7 @@ impl From<RuleResult> for DecisionType {
             RuleResult::Permit => DecisionType::Permit,
             RuleResult::Deny => DecisionType::Deny,
             RuleResult::IndeterminateDP => DecisionType::Indeterminate,
-            RuleResult::IndetermianteD => DecisionType::Indeterminate,
+            RuleResult::IndeterminateD => DecisionType::Indeterminate,
             RuleResult::IndeterminateP => DecisionType::Indeterminate,
             RuleResult::NotApplicable => DecisionType::NotApplicable,
         }

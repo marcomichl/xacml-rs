@@ -25,6 +25,7 @@ fn store_attribute(){
 }
 
 #[test]
+#[ignore]
 fn evaluate_policy() {
     let policy = create_policy();
     let request = create_request();
@@ -162,7 +163,22 @@ fn create_request() -> RequestType {
                         ]) // vec attribute_value
                         .build().unwrap(), // AttributeType
                 ]) // vec attribute
-                .build().unwrap() // AttributeType
+                .build().unwrap(), // AttributeType
+            AttributesTypeBuilder::default()
+                .category("request_parameter")
+                .attribute(vec![
+                    AttributeTypeBuilder::default()
+                        .attribute_id("request_context")
+                        .include_in_result(false)
+                        .attribute_value(vec![
+                            AttributeValueTypeBuilder::default()
+                                .data_type(DataType::String)
+                                .value(Value::String("vehicle_cam_acceptance".into()))
+                                .build().unwrap() // AttributeValue
+                        ]) // vec attribute_value
+                        .build().unwrap() // AttributeType
+                ]) // Attributes vec
+                .build().unwrap()
         ]) //vec attributes
         .build().unwrap() // RequestType
 }

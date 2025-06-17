@@ -74,12 +74,12 @@ fn deny_overrides(results: &Vec<RuleResult>) -> Result<PolicyResult, XacmlError>
     if results.iter().any(|f| f == &RuleResult::IndeterminateDP) {
         return Ok(PolicyResult::IndeterminateDP)
     }
-    if results.iter().any(|f| f == &RuleResult::IndetermianteD) && 
+    if results.iter().any(|f| f == &RuleResult::IndeterminateD) && 
         (results.iter().any(|f| f == &RuleResult::IndeterminateP) || 
         results.iter().any(|f| f == &RuleResult::Permit)) {
         return Ok(PolicyResult::IndeterminateDP)
     }
-    if results.iter().any(|f| f == &RuleResult::IndetermianteD) {
+    if results.iter().any(|f| f == &RuleResult::IndeterminateD) {
         return Ok(PolicyResult::IndetermianteD)
     }
     if results.iter().any(|f| f == &RuleResult::Permit) {

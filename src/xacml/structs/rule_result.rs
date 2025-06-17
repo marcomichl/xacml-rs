@@ -3,7 +3,7 @@ pub (super) enum RuleResult{
     Permit,
     Deny,
     IndeterminateDP,
-    IndetermianteD,
+    IndeterminateD,
     IndeterminateP,
     NotApplicable
 }
@@ -12,7 +12,7 @@ impl RuleResult {
     pub (super) fn get_legacy_result(&self) -> RuleResult {
         match self {
             RuleResult::IndeterminateP => RuleResult::IndeterminateDP,
-            RuleResult::IndetermianteD => RuleResult::IndeterminateDP,
+            RuleResult::IndeterminateD => RuleResult::IndeterminateDP,
             _ => *self
         }
     }
