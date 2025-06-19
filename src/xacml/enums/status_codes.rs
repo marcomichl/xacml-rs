@@ -1,1 +1,0 @@
-// See annex B.8 for the various status codes
