@@ -32,14 +32,14 @@ fn evaluate_policy() {
     let policy = create_policy();
     let request = create_request();
     let result = policy.evaluate_policy(&request).unwrap();
-    println!("{:?}", result)
+    assert_eq!(result, PolicyResult::Permit);
 }
 
 fn create_policy() -> PolicyType {
     PolicyTypeBuilder::default()
         .policy_id("sl_check_projected_probability")
         .version(VersionType("0.1".to_string()))
-        .rule_combining_alg_id(RuleCombiningAlgorithms::DenyUnlessPermit)
+        .rule_combining_alg_id(RuleCombiningAlgorithms::DenyOverrides)
         .description("Checks if the projected probability matches the required value")
         .target(TargetTypeBuilder::default()
             .any_of(vec![AnyOfTypeBuilder::default()
@@ -110,7 +110,7 @@ fn create_policy() -> PolicyType {
                                     ExpressionType::AttributeValue(
                                         AttributeValueTypeBuilder::default()
                                             .data_type(DataType::Double)
-                                            .value(Value::Double(0.9.into()))
+                                            .value(Value::Double(0.3.into()))
                                             .build().unwrap() // AttributeValue
                                     ) // AttributeValue
                                 ])

@@ -138,6 +138,21 @@ pub (super) fn double_greater_than(parameters: &Vec<&Value>) -> Result<Vec<Value
             _ => Err(XacmlError::new(XacmlErrorType::FormatError, format!("DoubleGreaterThan expects only Double type, is {:?}", p)))
         })
         .collect::<Result<Vec<&f64>, XacmlError>>()?;
+    let result = values[0] > values[1];
+    log(LogLevel::DEBUG, &format!("DoubleGreaterThan: {:?} = {}", values, result));
+    return Ok(vec![Value::Boolean(result)])
+}
+
+pub (super) fn double_greater_than_or_equal(parameters: &Vec<&Value>) -> Result<Vec<Value>, XacmlError> {
+    if parameters.len() != 2 {
+        return Err(XacmlError::new(XacmlErrorType::ProcessingError, "DoubleGreaterThanOrEqual expects 2 parameters".to_string()));
+    }
+    let values = parameters.iter()
+        .map(|p| match p {
+            Value::Double(f) => Ok(f),
+            _ => Err(XacmlError::new(XacmlErrorType::FormatError, format!("DoubleGreaterThan expects only Double type, is {:?}", p)))
+        })
+        .collect::<Result<Vec<&f64>, XacmlError>>()?;
     let result = values[0] >= values[1];
     log(LogLevel::DEBUG, &format!("DoubleGreaterThan: {:?} = {}", values, result));
     return Ok(vec![Value::Boolean(result)])
@@ -232,6 +247,32 @@ mod function_implementation_test {
         let parameters = vec![&Value::Double(34.5), &Value::Double(3.)];
         let result = double_divide(&parameters).unwrap();
         assert_eq!(result, vec![Value::Double(11.5)]);
+    }
+
+    #[test]
+    fn double_greater_than_test() {
+        let parameters = vec![&Value::Double(45.), &Value::Double(45.)];
+        let parameters2 = vec![&Value::Double(45.), &Value::Double(45.1)];
+        let parameters3 = vec![&Value::Double(45.1), &Value::Double(45.)];
+        let result = double_greater_than(&parameters).unwrap();
+        let result2 = double_greater_than(&parameters2).unwrap();        
+        let result3 = double_greater_than(&parameters3).unwrap();
+        assert_eq!(result, vec![Value::Boolean(false)]);
+        assert_eq!(result2, vec![Value::Boolean(false)]);
+        assert_eq!(result3, vec![Value::Boolean(true)]);
+    }
+
+    #[test]
+    fn double_greater_than_or_equal_test() {
+        let parameters = vec![&Value::Double(45.), &Value::Double(45.)];
+        let parameters2 = vec![&Value::Double(45.), &Value::Double(45.1)];
+        let parameters3 = vec![&Value::Double(45.1), &Value::Double(45.)];
+        let result = double_greater_than_or_equal(&parameters).unwrap();
+        let result2 = double_greater_than_or_equal(&parameters2).unwrap();        
+        let result3 = double_greater_than_or_equal(&parameters3).unwrap();
+        assert_eq!(result, vec![Value::Boolean(true)]);
+        assert_eq!(result2, vec![Value::Boolean(false)]);
+        assert_eq!(result3, vec![Value::Boolean(true)]);
     }
 
 }

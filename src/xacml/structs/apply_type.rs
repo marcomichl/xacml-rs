@@ -19,6 +19,15 @@ impl ApplyType {
     /// Evaluate the apply
     pub fn evaluate(&self, request: &RequestType) -> Result<Vec<Value>, XacmlError> {
         let empty_vec: Vec<ExpressionType> = Vec::new();
-        return self.function_id.apply(self.expression.as_ref().unwrap_or_else(|| &empty_vec), request)
+        let parameters: Vec<Value> = self.expression.as_ref()
+            .unwrap_or_else(|| &empty_vec)
+            .iter()
+            .map(|p| p.evaluate(request))
+            .collect::<Result<Vec<Vec<Value>>, XacmlError>>()?
+            .into_iter()
+            .flatten()
+            .collect();
+        //return self.function_id.apply(self.expression.as_ref().unwrap_or_else(|| &empty_vec), request)
+        self.function_id.apply_function(parameters.iter().collect())
     }
 }

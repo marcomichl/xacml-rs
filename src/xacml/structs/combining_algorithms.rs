@@ -60,8 +60,8 @@ impl RuleCombiningAlgorithms {
 
     pub fn apply(&self, results: &Vec<RuleResult>, parameters: &Option<Vec<RuleCombinerParametersType>>) -> Result<PolicyResult, XacmlError> {
         match self {
-            RuleCombiningAlgorithms::DenyOverrides => return deny_overrides(results),
-            _ => return Err(XacmlError::new(crate::utils::XacmlErrorType::NotImplemented, format!("RuleCombiningAlgorithm {} not yet implemented!", self.to_string())))
+            RuleCombiningAlgorithms::DenyOverrides => deny_overrides(results),
+            _ => Err(XacmlError::new(crate::utils::XacmlErrorType::NotImplemented, format!("RuleCombiningAlgorithm {} not yet implemented!", self.to_string())))
         }
     }
 }
@@ -111,8 +111,8 @@ impl<'de> Deserialize<'de> for RuleCombiningAlgorithms {
 }
 
 impl fmt::Display for RuleCombiningAlgorithms {
-    fn fmt (&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.to_string())
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
 
