@@ -4,6 +4,8 @@ use derive_builder::UninitializedFieldError;
 use quick_xml::{de::from_str, se::to_string};
 use serde::{Deserialize, Serialize};
 
+static log_level: LogLevel = LogLevel::DEBUG;
+
 pub fn parse_xml_file<T>(path: &str) -> Result<T, XacmlError>
 where
     T: for<'de> Deserialize<'de>,
@@ -82,7 +84,7 @@ pub enum LogLevel {
 }
 
 pub fn log(level: LogLevel, msg: &str) {
-    if level >= LogLevel::DEBUG{    // Later: use a config parameter here
+    if level >= log_level{    // Later: use a config parameter here
         println!("{}", msg)
     }
 }

@@ -26,6 +26,7 @@ mod policy_result;
 mod target_result;
 mod combining_algorithms;
 mod data_types;
+mod category_type;
 
 use core::str;
 use std::{ops::Deref, str::FromStr};
@@ -62,6 +63,7 @@ pub use policy_result::*;
 pub use target_result::*;
 pub use combining_algorithms::{RuleCombiningAlgorithms, PolicyCombiningAlgorithms};
 pub use data_types::*;
+pub use category_type::*;
 
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Builder)]

@@ -8,7 +8,7 @@ use super::*;
 #[builder(pattern = "owned", setter(into, strip_option))]
 pub struct AttributesType {
     #[serde(rename = "@Category")]
-    category: String,           //Specifies for what type of entity this attributes are defined
+    category: Categories,           //Specifies for what type of entity this attributes are defined
     #[serde(rename = "@xml:id", skip_serializing_if = "Option::is_none")]
     #[builder(default)]
     xml_id: Option<String>,     // Unique identifier for the attributes
@@ -59,25 +59,25 @@ mod attributes_type_test{
     fn get_value_by_selector_test() {
         let designator1 = AttributeDesignatorTypeBuilder::default()
             .attribute_id("Test-ID")
-            .category("Test-Category")
+            .category(Categories::Resource)
             .data_type(DataType::Boolean)
             .must_be_present(true)
             .build().unwrap();
         let designator2 = AttributeDesignatorTypeBuilder::default()
             .attribute_id("Test-ID")
-            .category("Test-Category")
+            .category(Categories::Resource)
             .data_type(DataType::Integer)
             .must_be_present(true)
             .build().unwrap();
         let designator3 = AttributeDesignatorTypeBuilder::default()
             .attribute_id("Test-ID")
-            .category("Test-Category")
+            .category(Categories::Resource)
             .data_type(DataType::Double)
             .must_be_present(true)
             .build().unwrap();
         let designator4 = AttributeDesignatorTypeBuilder::default()
             .attribute_id("Test-ID")
-            .category("Test-Category")
+            .category(Categories::Resource)
             .issuer("Test-Issuer")
             .data_type(DataType::Double)
             .must_be_present(true)
@@ -96,7 +96,7 @@ mod attributes_type_test{
                 ])
             .build().unwrap();
         let attributes = AttributesTypeBuilder::default()
-            .category("Test-Category")
+            .category(Categories::Resource)
             .attribute(vec![attribute])
             .build().unwrap();
         assert_eq!(attributes.get_values_by_designator(&designator1).unwrap(), vec![Value::Boolean(true)]);

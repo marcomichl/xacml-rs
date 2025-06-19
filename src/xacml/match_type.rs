@@ -22,7 +22,6 @@ impl MatchType{
     /// Has to be rewritten according to 7.6 (Match Evaluation)
     /// There are more functions that "simple" string match, comparable to the functions in Apply structures..
     pub fn match_request(&self, request: &RequestType) -> Result<TargetResult, XacmlError> {
-        println!("Starting Match Evaluation");
         let request_attribute_value_results = 
         if self.attribute_designator.is_some() && self.attribute_selector.is_none(){
             request.attributes.iter()
@@ -49,9 +48,7 @@ impl MatchType{
         // Designator and Selector did not bring a result
         if request_attribute_values.is_empty() {
             return Ok(TargetResult::NoMatch)
-        }
-        println!("Using the following attributes: {:?}", request_attribute_values);
-        
+        }        
         // One Match -> Match
 
         //todo: Application of the function in match_id, verify that return type is bool, error -> indeterminate
@@ -85,7 +82,7 @@ mod test_match_type {
             .return_policy_id_list(false)
             .combined_decision(false)
             .attributes(vec![AttributesTypeBuilder::default()
-                .category("TestCategory")
+                .category(Categories::Resource)
                 .attribute(vec![AttributeTypeBuilder::default()
                     .attribute_id("Test-ID")
                     .include_in_result(false)
@@ -106,7 +103,7 @@ mod test_match_type {
             .return_policy_id_list(false)
             .combined_decision(false)
             .attributes(vec![AttributesTypeBuilder::default()
-                .category("TestCategory")
+                .category(Categories::Resource)
                 .attribute(vec![AttributeTypeBuilder::default()
                     .attribute_id("Test-ID")
                     .include_in_result(false)
@@ -127,7 +124,7 @@ mod test_match_type {
             .return_policy_id_list(false)
             .combined_decision(false)
             .attributes(vec![AttributesTypeBuilder::default()
-                .category("TestCategory")
+                .category(Categories::Resource)
                 .attribute(vec![AttributeTypeBuilder::default()
                     .attribute_id("Wrong-ID")
                     .include_in_result(false)
@@ -148,7 +145,7 @@ mod test_match_type {
             .return_policy_id_list(false)
             .combined_decision(false)
             .attributes(vec![AttributesTypeBuilder::default()
-                .category("WrongCategory")
+                .category(Categories::Action)
                 .attribute(vec![AttributeTypeBuilder::default()
                     .attribute_id("Test-ID")
                     .include_in_result(false)
@@ -169,7 +166,7 @@ mod test_match_type {
             .return_policy_id_list(false)
             .combined_decision(false)
             .attributes(vec![AttributesTypeBuilder::default()
-                .category("TestCategory")
+                .category(Categories::Resource)
                 .attribute(vec![AttributeTypeBuilder::default()
                     .attribute_id("Test-ID")
                     .include_in_result(false)
@@ -188,7 +185,7 @@ mod test_match_type {
             .unwrap();
         let match_type = MatchTypeBuilder::default()
             .attribute_designator(AttributeDesignatorTypeBuilder::default()
-                .category("TestCategory")
+                .category(Categories::Resource)
                 .attribute_id("Test-ID")
                 .data_type(DataType::Integer)
                 .must_be_present(true)

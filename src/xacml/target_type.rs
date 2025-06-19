@@ -88,7 +88,7 @@ mod test_target_type{
                             .attribute_designator(AttributeDesignatorTypeBuilder::default()
                                 .attribute_id("request_context")
                                 .data_type(DataType::String)
-                                .category("request_parameter")
+                                .category(Categories::Resource)
                                 .must_be_present(true)
                                 .build().unwrap()) //AttributeDesignatorTypeBuilder    
                             .match_id(FunctionId::StringEqual)
@@ -111,7 +111,7 @@ mod test_target_type{
                                 .attribute_designator(AttributeDesignatorTypeBuilder::default()
                                     .attribute_id("request_context")
                                     .data_type(DataType::String)
-                                    .category("request_parameter")
+                                    .category(Categories::Resource)
                                     .must_be_present(true)
                                     .build().unwrap()) //AttributeDesignatorTypeBuilder    
                                 .match_id(FunctionId::StringEqual)
@@ -124,7 +124,7 @@ mod test_target_type{
                                 .attribute_designator(AttributeDesignatorTypeBuilder::default()
                                     .attribute_id("object.belief")
                                     .data_type(DataType::Double)
-                                    .category("subject")
+                                    .category(Categories::Action)
                                     .must_be_present(true)
                                     .build().unwrap()) //AttributeDesignatorTypeBuilder    
                                 .match_id(FunctionId::DoubleEqual)
@@ -148,7 +148,7 @@ mod test_target_type{
                                 .attribute_designator(AttributeDesignatorTypeBuilder::default()
                                     .attribute_id("request_context")
                                     .data_type(DataType::String)
-                                    .category("request_parameter")
+                                    .category(Categories::Resource)
                                     .must_be_present(true)
                                     .build().unwrap()) //AttributeDesignatorTypeBuilder    
                                 .match_id(FunctionId::StringEqual)
@@ -161,7 +161,7 @@ mod test_target_type{
                                 .attribute_designator(AttributeDesignatorTypeBuilder::default()
                                     .attribute_id("object.belief")
                                     .data_type(DataType::Double)
-                                    .category("subject")
+                                    .category(Categories::Action)
                                     .must_be_present(true)
                                     .build().unwrap()) //AttributeDesignatorTypeBuilder    
                                 .match_id(FunctionId::StringEqual)
@@ -186,7 +186,7 @@ mod test_target_type{
                                         .attribute_designator(AttributeDesignatorTypeBuilder::default()
                                             .attribute_id("object.belief")
                                             .data_type(DataType::Double)
-                                            .category("subject")
+                                            .category(Categories::Action)
                                             .must_be_present(true)
                                             .build().unwrap()) //AttributeDesignatorTypeBuilder    
                                         .match_id(FunctionId::DoubleEqual)
@@ -205,7 +205,7 @@ mod test_target_type{
                                         .attribute_designator(AttributeDesignatorTypeBuilder::default()
                                             .attribute_id("request_context")
                                             .data_type(DataType::String)
-                                            .category("request_parameter")
+                                            .category(Categories::Resource)
                                             .must_be_present(true)
                                             .build().unwrap()) //AttributeDesignatorTypeBuilder    
                                         .match_id(FunctionId::StringEqual)
@@ -232,7 +232,7 @@ mod test_target_type{
                                         .attribute_designator(AttributeDesignatorTypeBuilder::default()
                                             .attribute_id("object.belief")
                                             .data_type(DataType::Double)
-                                            .category("subject")
+                                            .category(Categories::Action)
                                             .must_be_present(true)
                                             .build().unwrap()) //AttributeDesignatorTypeBuilder    
                                         .match_id(FunctionId::DoubleEqual)
@@ -249,7 +249,7 @@ mod test_target_type{
                                         .attribute_designator(AttributeDesignatorTypeBuilder::default()
                                             .attribute_id("request_context")
                                             .data_type(DataType::String)
-                                            .category("request_parameter")
+                                            .category(Categories::Resource)
                                             .must_be_present(true)
                                             .build().unwrap()) //AttributeDesignatorTypeBuilder    
                                         .match_id(FunctionId::StringEqual)
@@ -268,7 +268,7 @@ mod test_target_type{
             .combined_decision(false)
             .attributes(vec![
                 AttributesTypeBuilder::default()
-                    .category("subject")
+                    .category(Categories::Action)
                     .attribute(vec![
                         AttributeTypeBuilder::default()
                             .attribute_id("object.belief")
@@ -303,7 +303,7 @@ mod test_target_type{
                     ]) // vec attribute
                     .build().unwrap(), // AttributeType 
                 AttributesTypeBuilder::default()
-                    .category("request_parameter")
+                    .category(Categories::Resource)
                     .attribute(vec![
                         AttributeTypeBuilder::default()
                             .attribute_id("request_context")

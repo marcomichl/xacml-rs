@@ -13,7 +13,7 @@ pub struct AttributeDesignatorType{
     #[serde(rename = "@DataType")]
     pub (super) data_type: DataType,          // More specific of URI type
     #[serde(rename = "@Category")]
-    pub (super) category: String,           // More specific of URI type
+    pub (super) category: Categories,           // More specific of URI type
     #[serde(rename = "@MustBePresent")]
     pub (super) must_be_present: bool,
     #[serde(rename = "@Issuer", skip_serializing_if = "Option::is_none")]
@@ -51,7 +51,7 @@ mod attribute_designator_type_test {
             .return_policy_id_list(false)
             .combined_decision(false)
             .attributes(vec![AttributesTypeBuilder::default()
-                .category("TestCategory")
+                .category(Categories::Resource)
                 .attribute(vec![AttributeTypeBuilder::default()
                     .attribute_id("Test-ID")
                     .include_in_result(false)
@@ -71,7 +71,7 @@ mod attribute_designator_type_test {
         let designator = AttributeDesignatorTypeBuilder::default()
             .attribute_id("Test-ID")
             .data_type(DataType::Integer)
-            .category("TestCategory")
+            .category(Categories::Resource)
             .must_be_present(false)
             .build().unwrap();
         let result = designator.evaluate(&request).unwrap();

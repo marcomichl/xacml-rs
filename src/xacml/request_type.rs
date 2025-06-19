@@ -66,7 +66,7 @@ mod request_type_test {
             .return_policy_id_list(false)
             .combined_decision(false)
             .attributes(vec![AttributesTypeBuilder::default()
-                .category("TestCategory")
+                .category(Categories::Resource)
                 .attribute(vec![AttributeTypeBuilder::default()
                     .attribute_id("Test-ID")
                     .include_in_result(false)
@@ -83,18 +83,18 @@ mod request_type_test {
             ])
             .build()
             .unwrap();
-        assert_eq!(quick_xml::se::to_string(&request).unwrap(), r#"<RequestType ReturnPolicyIdList="false" CombinedDecision="false"><Attributes Category="TestCategory"><Attribute AttributeId="Test-ID" IncludeInResult="false"><AttributeValue DataType="http://www.w3.org/2001/XMLSchema#integer">23</AttributeValue></Attribute></Attributes></RequestType>"#)
+        assert_eq!(quick_xml::se::to_string(&request).unwrap(), r#"<RequestType ReturnPolicyIdList="false" CombinedDecision="false"><Attributes Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"><Attribute AttributeId="Test-ID" IncludeInResult="false"><AttributeValue DataType="http://www.w3.org/2001/XMLSchema#integer">23</AttributeValue></Attribute></Attributes></RequestType>"#)
     }
 
     #[test]
     fn request_type_deserialization_test() {
-        let serialized_request = r#"<RequestType ReturnPolicyIdList="false" CombinedDecision="false"><Attributes Category="TestCategory"><Attribute AttributeId="Test-ID" IncludeInResult="false"><AttributeValue DataType="http://www.w3.org/2001/XMLSchema#integer">23</AttributeValue></Attribute></Attributes></RequestType>"#;
+        let serialized_request = r#"<RequestType ReturnPolicyIdList="false" CombinedDecision="false"><Attributes Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"><Attribute AttributeId="Test-ID" IncludeInResult="false"><AttributeValue DataType="http://www.w3.org/2001/XMLSchema#integer">23</AttributeValue></Attribute></Attributes></RequestType>"#;
         let request: RequestType = quick_xml::de::from_str(&serialized_request).unwrap();
         let built_request = RequestTypeBuilder::default()
             .return_policy_id_list(false)
             .combined_decision(false)
             .attributes(vec![AttributesTypeBuilder::default()
-                .category("TestCategory")
+                .category(Categories::Resource)
                 .attribute(vec![AttributeTypeBuilder::default()
                     .attribute_id("Test-ID")
                     .include_in_result(false)

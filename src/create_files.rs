@@ -41,7 +41,7 @@ fn create_policy(){
                                                                     .build().unwrap()
                                                                 )
                                                                 .attribute_designator(AttributeDesignatorTypeBuilder::default()
-                                                                    .category("urn:sl-xacml:subject-category:access-subject")
+                                                                    .category(Categories::Other("urn:sl-xacml:subject-category:access-subject".to_string()))
                                                                     .attribute_id("urn:sl-xacml:attribute:role")
                                                                     .data_type(DataType::String)
                                                                     .must_be_present(false)
@@ -71,7 +71,7 @@ fn test_evaluate_simple_policy(){
         .attributes(
             vec![
                 AttributesTypeBuilder::default()
-                    .category("urn:sl-xacml:subject-category:access-subject")
+                    .category(Categories::Other("urn:sl-xacml:subject-category:access-subject".to_string()))
                     .attribute(
                         vec![
                             AttributeTypeBuilder::default()

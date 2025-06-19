@@ -4,7 +4,7 @@ use crate::utils::*;
 #[test]
 #[ignore = "Creates file for paper use"]
 fn store_policy() {
-    let policy = create_policy();
+    let policy = create_policy(0.6);
     serialize_to_xml_file(&policy, "sl_policy.xml").unwrap();
 }
 
@@ -27,19 +27,18 @@ fn store_attribute(){
 #[test]
 #[ignore]
 fn evaluate_policy() {
-    println!("Pre evaluation");
-
-    let policy = create_policy();
+    let policy = create_policy(0.8);
     let request = create_request();
-    let result = policy.evaluate_policy(&request).unwrap();
-    assert_eq!(result, PolicyResult::Permit);
+    assert_eq!(policy.evaluate_policy(&request).unwrap(), PolicyResult::Deny);
+    let policy = create_policy(0.6);
+    assert_eq!(policy.evaluate_policy(&request).unwrap(), PolicyResult::Permit);
 }
 
-fn create_policy() -> PolicyType {
+fn create_policy(threshold: f64) -> PolicyType {
     PolicyTypeBuilder::default()
         .policy_id("sl_check_projected_probability")
         .version(VersionType("0.1".to_string()))
-        .rule_combining_alg_id(RuleCombiningAlgorithms::DenyOverrides)
+        .rule_combining_alg_id(RuleCombiningAlgorithms::DenyUnlessPermit)
         .description("Checks if the projected probability matches the required value")
         .target(TargetTypeBuilder::default()
             .any_of(vec![AnyOfTypeBuilder::default()
@@ -52,7 +51,7 @@ fn create_policy() -> PolicyType {
                             .attribute_designator(AttributeDesignatorTypeBuilder::default()
                                 .attribute_id("request_context")
                                 .data_type(DataType::String)
-                                .category("request_parameter")
+                                .category(Categories::Action)
                                 .must_be_present(true)
                                 .build().unwrap()) //AttributeDesignatorTypeBuilder    
                             .match_id(FunctionId::StringEqual)
@@ -81,7 +80,7 @@ fn create_policy() -> PolicyType {
                                                 ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
                                                     .attribute_id("object.belief")
                                                     .data_type(DataType::Double)
-                                                    .category("subject")
+                                                    .category(Categories::Resource)
                                                     .must_be_present(true)
                                                     .build().unwrap()), // AttributeDesignator
                                                 ExpressionType::Apply(ApplyTypeBuilder::default()
@@ -91,13 +90,13 @@ fn create_policy() -> PolicyType {
                                                         ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
                                                             .attribute_id("object.uncertainty")
                                                             .data_type(DataType::Double)
-                                                            .category("subject")
+                                                            .category(Categories::Resource)
                                                             .must_be_present(true)
                                                             .build().unwrap()), // AttributeDesignator
                                                         ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
                                                             .attribute_id("object.baserate")
                                                             .data_type(DataType::Double)
-                                                            .category("subject")
+                                                            .category(Categories::Resource)
                                                             .must_be_present(true)
                                                             .build().unwrap()), // AttributeDesignator
                                                     ]) // vec expression
@@ -110,7 +109,7 @@ fn create_policy() -> PolicyType {
                                     ExpressionType::AttributeValue(
                                         AttributeValueTypeBuilder::default()
                                             .data_type(DataType::Double)
-                                            .value(Value::Double(0.3.into()))
+                                            .value(Value::Double(threshold))
                                             .build().unwrap() // AttributeValue
                                     ) // AttributeValue
                                 ])
@@ -131,7 +130,7 @@ fn create_request() -> RequestType {
         .combined_decision(false)
         .attributes(vec![
             AttributesTypeBuilder::default()
-                .category("subject")
+                .category(Categories::Resource)
                 .attribute(vec![
                     AttributeTypeBuilder::default()
                         .attribute_id("object.belief")
@@ -139,7 +138,7 @@ fn create_request() -> RequestType {
                         .attribute_value(vec![
                             AttributeValueTypeBuilder::default()
                                 .data_type(DataType::Double)
-                                .value(Value::Double(0.1.into()))
+                                .value(Value::Double(0.5.into()))
                                 .build().unwrap() // AttributeValue
                         ]) // vec attribute_value
                         .build().unwrap(), // AttributeType
@@ -166,7 +165,7 @@ fn create_request() -> RequestType {
                 ]) // vec attribute
                 .build().unwrap(), // AttributeType 
             AttributesTypeBuilder::default()
-                .category("request_parameter")
+                .category(Categories::Action)
                 .attribute(vec![
                     AttributeTypeBuilder::default()
                         .attribute_id("request_context")
@@ -200,13 +199,13 @@ fn create_discounting_belief() -> ExpressionType {
                 ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
                     .attribute_id("node_trust_projected_probability")
                     .data_type(DataType::Double)
-                    .category("subject")
+                    .category(Categories::Resource)
                     .must_be_present(true)
                     .build().unwrap()),
                 ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
                     .attribute_id("data_trust_belief")
                     .data_type(DataType::Double)
-                    .category("subject")
+                    .category(Categories::Resource)
                     .must_be_present(true)
                     .build().unwrap())
             ])
@@ -241,7 +240,7 @@ fn create_discounting_uncertainty() -> ExpressionType {
                             ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
                                 .attribute_id("node_trust_projected_probability")
                                 .data_type(DataType::Double)
-                                .category("subject")
+                                .category(Categories::Resource)
                                 .must_be_present(true)
                                 .build().unwrap()),
                             ExpressionType::Apply(
@@ -252,7 +251,7 @@ fn create_discounting_uncertainty() -> ExpressionType {
                                         ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
                                             .attribute_id("Belief supporting trust in data")
                                             .data_type(DataType::Double)
-                                            .category("subject")
+                                            .category(Categories::Resource)
                                             .must_be_present(true)
                                             .build().unwrap())
                             ])

@@ -76,7 +76,6 @@ impl PolicyType {
 
     pub fn evaluate_policy(&self, request: &RequestType) -> Result<PolicyResult, XacmlError> {
         let target_result = self.target.as_ref().unwrap_or(&TargetType{any_of: None}).match_request(request)?;
-        log(LogLevel::DEBUG, &format!("Policy {} target evaluated to {:?}", self.policy_id, target_result));
         match target_result {
             TargetResult::NoMatch => {
                 log(LogLevel::DEBUG, &format!("Policy {} did not match target, NotApplicable", self.policy_id));
@@ -97,7 +96,7 @@ impl PolicyType {
                 let rule_results = self.rule.iter()
                         .map(|r| r.evaluate_rule(request)).collect::<Result<Vec<RuleResult>, XacmlError>>()?;
                 let return_value = self.rule_combining_alg_id.apply(&rule_results, &self.rule_combiner_parameters)?;
-                log(LogLevel::DEBUG, &format!("Policy {} target evaluation ideterminate, {:?}", self.policy_id, return_value));
+                log(LogLevel::DEBUG, &format!("Policy {} target evaluation matched, returning {:?}", self.policy_id, return_value));
                 Ok(return_value)
             }
         }

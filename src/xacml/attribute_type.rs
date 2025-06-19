@@ -49,7 +49,7 @@ mod attribute_type_test {
     fn get_attribute_values_by_designator_test() {
         let designator = AttributeDesignatorTypeBuilder::default()
             .attribute_id("Test-ID")
-            .category("Test-Category")
+            .category(Categories::Resource)
             .data_type(DataType::Boolean)
             .must_be_present(true)
             .build().unwrap();
@@ -81,20 +81,20 @@ mod attribute_type_test {
     fn get_attribute_values_by_designator_empty_test() {
         let designator1 = AttributeDesignatorTypeBuilder::default()
             .attribute_id("Not Test-ID")
-            .category("Test-Category")
+            .category(Categories::Resource)
             .data_type(DataType::Boolean)
             .must_be_present(true)
             .build().unwrap();
         let designator2 = AttributeDesignatorTypeBuilder::default()
             .attribute_id("Test-ID")
-            .category("Test-Category")
+            .category(Categories::Resource)
             .issuer("test_issuer")
             .data_type(DataType::Boolean)
             .must_be_present(true)
             .build().unwrap();
         let designator3 = AttributeDesignatorTypeBuilder::default()
             .attribute_id("Test-ID")
-            .category("Test-Category")
+            .category(Categories::Resource)
             .data_type(DataType::Integer)
             .must_be_present(true)
             .build().unwrap();

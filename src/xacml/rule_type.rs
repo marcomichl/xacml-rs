@@ -118,7 +118,7 @@ mod rule_test{
                                 .attribute_designator(AttributeDesignatorTypeBuilder::default()
                                     .attribute_id("request_context")
                                     .data_type(DataType::Integer)
-                                    .category("request_context")
+                                    .category(Categories::Resource)
                                     .must_be_present(true)
                                     .build().unwrap()) //AttributeDesignatorTypeBuilder    
                                 .match_id(FunctionId::StringEqual)
@@ -144,7 +144,7 @@ mod rule_test{
                                 .attribute_designator(AttributeDesignatorTypeBuilder::default()
                                     .attribute_id("request_context")
                                     .data_type(DataType::Integer)
-                                    .category("request_context")
+                                    .category(Categories::Resource)
                                     .must_be_present(true)
                                     .build().unwrap()) //AttributeDesignatorTypeBuilder    
                                 .match_id(FunctionId::IntegerEqual)
@@ -158,7 +158,7 @@ mod rule_test{
                     .expression(vec![ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
                             .attribute_id("request_context")
                             .data_type(DataType::Integer)
-                            .category("request_context")
+                            .category(Categories::Resource)
                             .must_be_present(true)
                             .build().unwrap()), // AttributeDesignatoreType
                         ExpressionType::AttributeValue(AttributeValueTypeBuilder::default()
@@ -178,7 +178,7 @@ mod rule_test{
             .combined_decision(false)
             .attributes(vec![
                  AttributesTypeBuilder::default()
-                .category("request_context")
+                .category(Categories::Resource)
                 .attribute(vec![
                     AttributeTypeBuilder::default()
                         .attribute_id("request_context")

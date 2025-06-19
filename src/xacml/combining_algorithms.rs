@@ -61,6 +61,7 @@ impl RuleCombiningAlgorithms {
     pub fn apply(&self, results: &Vec<RuleResult>, parameters: &Option<Vec<RuleCombinerParametersType>>) -> Result<PolicyResult, XacmlError> {
         match self {
             RuleCombiningAlgorithms::DenyOverrides => deny_overrides(results),
+            RuleCombiningAlgorithms::DenyUnlessPermit => deny_unless_permit(results), 
             _ => Err(XacmlError::new(crate::utils::XacmlErrorType::NotImplemented, format!("RuleCombiningAlgorithm {} not yet implemented!", self.to_string())))
         }
     }
@@ -89,6 +90,13 @@ fn deny_overrides(results: &Vec<RuleResult>) -> Result<PolicyResult, XacmlError>
         return Ok(PolicyResult::IndeterminateP)
     }
     return Ok(PolicyResult::NotApplicable)
+}
+
+fn deny_unless_permit(results: &Vec<RuleResult>) -> Result<PolicyResult, XacmlError> {
+    if results.iter().any(|f| f == &RuleResult::Permit) {
+        return Ok(PolicyResult::Permit)
+    }
+    return Ok(PolicyResult::Deny)
 }
 
 impl Serialize for RuleCombiningAlgorithms {
