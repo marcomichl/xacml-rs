@@ -86,6 +86,7 @@ pub (super) fn double_add(parameters: &Vec<&Value>) -> Result<Vec<Value>, XacmlE
         .collect::<Result<Vec<&f64>, XacmlError>>()?;
     let mut result: f64 = 0.0;
     values.iter().for_each(|x| result += *x);
+    result = round_f64(result, 5);
     log(LogLevel::DEBUG, &format!("DoubleAdd: {:?} = {}", values, result));
     return Ok(vec![Value::Double(result)])
 }
@@ -99,6 +100,7 @@ pub (super) fn double_subtract(parameters: &Vec<&Value>) -> Result<Vec<Value>, X
         .collect::<Result<Vec<&f64>, XacmlError>>()?;
     let mut result = values[0] *2.0  ;  // gets subtracted once
     values.iter().for_each(|x | result -= *x);
+    result = round_f64(result, 5);
     log(LogLevel::DEBUG, &format!("DoubleSubtract: {:?} = {}", values, result));
     return Ok(vec![Value::Double(result.into())])
 }
@@ -109,8 +111,10 @@ pub (super) fn double_multiply(parameters: &Vec<&Value>) -> Result<Vec<Value>, X
             Value::Double(f) => Ok(f),
             _ => Err(XacmlError::new(XacmlErrorType::FormatError, format!("DoubleMultiply expects only Double type, is {:?}", p)))
         })
-        .collect::<Result<Vec<&f64>, XacmlError>>()?;    let mut result = 1.0 ; 
+        .collect::<Result<Vec<&f64>, XacmlError>>()?;    
+    let mut result = 1.0 ; 
     values.iter().for_each(|x | result *= *x);
+    result = round_f64(result, 5);
     log(LogLevel::DEBUG, &format!("DoubleMultiply: {:?} = {}", values, result));
     return Ok(vec![Value::Double(result.into())])
 }
@@ -124,6 +128,7 @@ pub (super) fn double_divide(parameters: &Vec<&Value>) -> Result<Vec<Value>, Xac
         .collect::<Result<Vec<&f64>, XacmlError>>()?;
     let mut result = values[0] * values[0]; 
     values.iter().for_each(|x | result /= *x);
+    result = round_f64(result, 5);
     log(LogLevel::DEBUG, &format!("DoubleDivide: {:?} = {}", values, result));
     return Ok(vec![Value::Double(result.into())])
 }
@@ -158,9 +163,9 @@ pub (super) fn double_greater_than_or_equal(parameters: &Vec<&Value>) -> Result<
     return Ok(vec![Value::Boolean(result)])
 }
 
-
-fn check_parameter_type(parameters: &Vec<Value>, expected_type: &Value) -> bool {
-    parameters.iter().all(|v| std::mem::discriminant(v) == std::mem::discriminant(expected_type))
+fn round_f64(value: f64, decimals: u32) -> f64 {
+    let factor = 10f64.powi(decimals as i32);
+    (value * factor).round() / factor
 }
 
 #[cfg(test)]
@@ -226,6 +231,13 @@ mod function_implementation_test {
         let parameters = vec![&Value::Double(22.9), &Value::Double(27.1)];
         let result = double_add(&parameters).unwrap();
         assert_eq!(result, vec![Value::Double(50.0)]);
+    }
+
+    #[test]
+    fn double_add_with_round_test() {
+        let parameters = vec![&Value::Double(0.1), &Value::Double(0.2)];
+        let result = double_add(&parameters).unwrap();
+        assert_eq!(result, vec![Value::Double(0.3)]);
     }
 
     #[test]
