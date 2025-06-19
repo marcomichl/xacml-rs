@@ -1,4 +1,4 @@
-use crate::xacml::structs::*;
+use crate::xacml::*;
 use crate::utils::*;
 
 #[test]

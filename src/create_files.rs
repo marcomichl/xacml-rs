@@ -1,11 +1,11 @@
 #[cfg(test)]
 
 
-use crate::xacml::structs::RuleTypeBuilder;
+use crate::xacml::RuleTypeBuilder;
 #[allow(unused_imports)]
 use super::*;
 #[allow(unused_imports)]
-use crate::xacml::structs::*;
+use crate::xacml::*;
 
 
 #[test]

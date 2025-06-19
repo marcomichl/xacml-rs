@@ -1,5 +1,5 @@
 use crate::utils::*;
-use crate::xacml::structs::*;
+use crate::xacml::*;
 
 
 pub fn get_policy_from_context(context: &str) -> Result<PolicyType, XacmlError> {

@@ -8,7 +8,7 @@ mod ls_policies;
 use std::env;
 #[allow(unused_imports)]
 use utils::{parse_xml_file, serialize_to_xml_file};
-use xacml::structs::*;
+use xacml::*;
 
 fn main() {
  
