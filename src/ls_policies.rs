@@ -27,9 +27,10 @@ fn store_attribute(){
 #[test]
 #[ignore]
 fn evaluate_policy() {
+    println!("Pre evaluation");
+
     let policy = create_policy();
     let request = create_request();
-
     let result = policy.evaluate_policy(&request).unwrap();
     println!("{:?}", result)
 }
@@ -163,7 +164,7 @@ fn create_request() -> RequestType {
                         ]) // vec attribute_value
                         .build().unwrap(), // AttributeType
                 ]) // vec attribute
-                .build().unwrap(), // AttributeType
+                .build().unwrap(), // AttributeType 
             AttributesTypeBuilder::default()
                 .category("request_parameter")
                 .attribute(vec![

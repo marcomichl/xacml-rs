@@ -23,7 +23,7 @@ mod attribute_designator_type;
 mod decision_type;
 mod rule_result;
 mod policy_result;
-mod target_results;
+mod target_result;
 mod combining_algorithms;
 mod data_types;
 
@@ -59,7 +59,7 @@ pub use attribute_designator_type::*;
 pub use decision_type::*;
 pub use rule_result::*;
 pub use policy_result::*;
-pub use target_results::*;
+pub use target_result::*;
 pub use combining_algorithms::{RuleCombiningAlgorithms, PolicyCombiningAlgorithms};
 pub use data_types::*;
 

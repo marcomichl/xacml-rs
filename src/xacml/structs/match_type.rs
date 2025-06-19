@@ -19,10 +19,10 @@ pub struct MatchType {
 }
 
 impl MatchType{
-
     /// Has to be rewritten according to 7.6 (Match Evaluation)
     /// There are more functions that "simple" string match, comparable to the functions in Apply structures..
     pub fn match_request(&self, request: &RequestType) -> Result<TargetResult, XacmlError> {
+        println!("Starting Match Evaluation");
         let request_attribute_value_results = 
         if self.attribute_designator.is_some() && self.attribute_selector.is_none(){
             request.attributes.iter()
@@ -50,6 +50,7 @@ impl MatchType{
         if request_attribute_values.is_empty() {
             return Ok(TargetResult::NoMatch)
         }
+        println!("Using the following attributes: {:?}", request_attribute_values);
         
         // One Match -> Match
 

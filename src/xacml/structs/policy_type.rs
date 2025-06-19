@@ -76,7 +76,8 @@ impl PolicyType {
 
     pub fn evaluate_policy(&self, request: &RequestType) -> Result<PolicyResult, XacmlError> {
         let target_result = self.target.as_ref().unwrap_or(&TargetType{any_of: None}).match_request(request)?;
-        return match target_result {
+        log(LogLevel::DEBUG, &format!("Policy target evaluated to {:?}", target_result));
+        match target_result {
             TargetResult::NoMatch => {
                 log(LogLevel::DEBUG, &format!("Policy {} did not match target, NotApplicable", self.policy_id));
                 Ok(PolicyResult::NotApplicable)
@@ -101,4 +102,10 @@ impl PolicyType {
             }
         }
     }
+}
+
+mod policy_test{
+    use super::*;
+
+
 }
