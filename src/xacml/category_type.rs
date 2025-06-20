@@ -7,13 +7,25 @@ pub enum Categories {
     Resource,
     Action,
     Environment,
+    AccessSubject,
+    SubjectCodebase,
+    IntermediarySubject,
+    RecipientSubject,
+    RequestingMachine,
     Other(String)
 }
 
 const CATEGORY_MAPPING : &[(Categories, &str)] = &[
+    // Standardized identifiers in XACML3.0
     (Categories::Resource, "urn:oasis:names:tc:xacml:3.0:attribute-category:resource"),
     (Categories::Action, "urn:oasis:names:tc:xacml:3.0:attribute-category:action"),
     (Categories::Environment, "urn:oasis:names:tc:xacml:3.0:attribute-category:environment"),
+    // Further identifiers, see XACML 3.0 10.2.6
+    (Categories::AccessSubject, "urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"),
+    (Categories::SubjectCodebase, "urn:oasis:names:tc:xacml:1.0:subject-category:codebase"),
+    (Categories::IntermediarySubject, "urn:oasis:names:tc:xacml:1.0:subject-category:intermediary-subject"),
+    (Categories::RecipientSubject, "urn:oasis:names:tc:xacml:1.0:subject-category:recipient-subject"),
+    (Categories::RequestingMachine, "urn:oasis:names:tc:xacml:1.0:subject-category:requesting-machine")
 ];
 
 impl FromStr for Categories {
@@ -111,23 +123,3 @@ mod category_type_test {
     }
 
 }
-/*
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:subject:authn-locality:dns-name"),
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:subject:authn-locality:ip-address"),
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:subject:authentication-method"),
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:subject:authentication-time"),
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:subject:key-info"),
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:subject:request-time"),
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:subject:session-start-time"),
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:subject:subject-id"),
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:subject:subject-id-qualifier"),
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"),
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:subject-category:codebase"),
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:subject-category:intermediary-subject"),
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:subject-category:recipient-subject"),
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:subject-category:requesting-machine"),
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:resource:resource-location"),
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:resource:resource-id"),
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:resource:simple-file-name"),
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:action:action-id"),
-    (Identifiers::, "urn:oasis:names:tc:xacml:1.0:action:implied-action"), */

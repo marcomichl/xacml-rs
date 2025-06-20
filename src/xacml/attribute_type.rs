@@ -6,7 +6,7 @@ use super::*;
 #[builder(pattern = "owned", setter(into, strip_option))]
 pub struct AttributeType {
     #[serde(rename = "@AttributeId")]
-    pub attribute_id: String,       // Pre-defined URIs in the Annex B, but contain only commonly used; might be implemented as enum
+    pub attribute_id: AttributeIdentifiers,       // Pre-defined URIs in the Annex B, but contain only commonly used; might be implemented as enum
     #[serde(rename = "@IncludeInResult", default = "default_false")]
     pub include_in_result: bool,
     #[serde(rename = "@Issuer", skip_serializing_if = "Option::is_none")]
@@ -48,13 +48,13 @@ mod attribute_type_test {
     #[test]
     fn get_attribute_values_by_designator_test() {
         let designator = AttributeDesignatorTypeBuilder::default()
-            .attribute_id("Test-ID")
+            .attribute_id(AttributeIdentifiers::Other("Test-ID".to_string()))
             .category(Categories::Resource)
             .data_type(DataType::Boolean)
             .must_be_present(true)
             .build().unwrap();
         let attribute = AttributeTypeBuilder::default()
-            .attribute_id("Test-ID")
+            .attribute_id(AttributeIdentifiers::Other("Test-ID".to_string()))
             .include_in_result(true)
             .attribute_value(vec![AttributeValueTypeBuilder::default()
                 .data_type(DataType::Boolean)
@@ -80,26 +80,26 @@ mod attribute_type_test {
     #[test]
     fn get_attribute_values_by_designator_empty_test() {
         let designator1 = AttributeDesignatorTypeBuilder::default()
-            .attribute_id("Not Test-ID")
+            .attribute_id(AttributeIdentifiers::Other("Not Test-ID".to_string()))
             .category(Categories::Resource)
             .data_type(DataType::Boolean)
             .must_be_present(true)
             .build().unwrap();
         let designator2 = AttributeDesignatorTypeBuilder::default()
-            .attribute_id("Test-ID")
+            .attribute_id(AttributeIdentifiers::Other("Test-ID".to_string()))
             .category(Categories::Resource)
             .issuer("test_issuer")
             .data_type(DataType::Boolean)
             .must_be_present(true)
             .build().unwrap();
         let designator3 = AttributeDesignatorTypeBuilder::default()
-            .attribute_id("Test-ID")
+            .attribute_id(AttributeIdentifiers::Other("Test-ID".to_string()))
             .category(Categories::Resource)
             .data_type(DataType::Integer)
             .must_be_present(true)
             .build().unwrap();
         let attribute = AttributeTypeBuilder::default()
-            .attribute_id("Test-ID")
+            .attribute_id(AttributeIdentifiers::Other("Test-ID".to_string()))
             .include_in_result(true)
             .attribute_value(vec![AttributeValueTypeBuilder::default()
                 .data_type(DataType::Boolean)
@@ -108,7 +108,7 @@ mod attribute_type_test {
                 ])
             .build().unwrap();
         let attribute2 = AttributeTypeBuilder::default()
-            .attribute_id("Test-ID")
+            .attribute_id(AttributeIdentifiers::Other("Test-ID".to_string()))
             .include_in_result(true)
             .issuer("test_issuer")
             .attribute_value(vec![AttributeValueTypeBuilder::default()

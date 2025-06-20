@@ -9,7 +9,7 @@ use super::*;
 #[builder(pattern = "owned", setter(into, strip_option))]
 pub struct AttributeDesignatorType{
     #[serde(rename = "@AttributeId")]
-    pub (super) attribute_id: String,       // More specific of URI type
+    pub (super) attribute_id: AttributeIdentifiers,       // More specific of URI type
     #[serde(rename = "@DataType")]
     pub (super) data_type: DataType,          // More specific of URI type
     #[serde(rename = "@Category")]
@@ -53,7 +53,7 @@ mod attribute_designator_type_test {
             .attributes(vec![AttributesTypeBuilder::default()
                 .category(Categories::Resource)
                 .attribute(vec![AttributeTypeBuilder::default()
-                    .attribute_id("Test-ID")
+                    .attribute_id(AttributeIdentifiers::Other("Test-ID".to_string()))
                     .include_in_result(false)
                     .attribute_value(vec![AttributeValueTypeBuilder::default()
                         .data_type(DataType::Integer)
@@ -69,7 +69,7 @@ mod attribute_designator_type_test {
             .build()
             .unwrap();
         let designator = AttributeDesignatorTypeBuilder::default()
-            .attribute_id("Test-ID")
+            .attribute_id(AttributeIdentifiers::Other("Test-ID".to_string()))
             .data_type(DataType::Integer)
             .category(Categories::Resource)
             .must_be_present(false)

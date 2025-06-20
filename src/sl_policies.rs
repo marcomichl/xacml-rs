@@ -12,7 +12,7 @@ fn store_policy() {
 #[ignore = "Create file for paper use"]
 fn store_attribute(){
     let attribute =  AttributeTypeBuilder::default()
-        .attribute_id("object.belief")
+        .attribute_id(AttributeIdentifiers::Other(AttributeIdentifiers::Other("object.belief".to_string()).to_string()))
         .include_in_result(false)
         .attribute_value(vec![
             AttributeValueTypeBuilder::default()
@@ -49,7 +49,7 @@ fn create_policy(threshold: f64) -> PolicyType {
                                 .value(Value::String("vehicle_cam_acceptance".to_string()))
                                 .build().unwrap()) //AttributeValueTypeBuilder
                             .attribute_designator(AttributeDesignatorTypeBuilder::default()
-                                .attribute_id("request_context")
+                                .attribute_id(AttributeIdentifiers::Other(AttributeIdentifiers::Other("request_context".to_string()).to_string()))
                                 .data_type(DataType::String)
                                 .category(Categories::Action)
                                 .must_be_present(true)
@@ -78,7 +78,7 @@ fn create_policy(threshold: f64) -> PolicyType {
                                             .description("Add belief to product of base rate and uncertainty")
                                             .expression(vec![
                                                 ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
-                                                    .attribute_id("object.belief")
+                                                    .attribute_id(AttributeIdentifiers::Other("object.belief".to_string()))
                                                     .data_type(DataType::Double)
                                                     .category(Categories::Resource)
                                                     .must_be_present(true)
@@ -88,13 +88,13 @@ fn create_policy(threshold: f64) -> PolicyType {
                                                     .description("Multiply belief and base rate")
                                                     .expression(vec![
                                                         ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
-                                                            .attribute_id("object.uncertainty")
+                                                            .attribute_id(AttributeIdentifiers::Other("object.uncertainty".to_string()))
                                                             .data_type(DataType::Double)
                                                             .category(Categories::Resource)
                                                             .must_be_present(true)
                                                             .build().unwrap()), // AttributeDesignator
                                                         ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
-                                                            .attribute_id("object.baserate")
+                                                            .attribute_id(AttributeIdentifiers::Other("object.baserate".to_string()))
                                                             .data_type(DataType::Double)
                                                             .category(Categories::Resource)
                                                             .must_be_present(true)
@@ -133,7 +133,7 @@ fn create_request() -> RequestType {
                 .category(Categories::Resource)
                 .attribute(vec![
                     AttributeTypeBuilder::default()
-                        .attribute_id("object.belief")
+                        .attribute_id(AttributeIdentifiers::Other("object.belief".to_string()))
                         .include_in_result(false)
                         .attribute_value(vec![
                             AttributeValueTypeBuilder::default()
@@ -143,7 +143,7 @@ fn create_request() -> RequestType {
                         ]) // vec attribute_value
                         .build().unwrap(), // AttributeType
                     AttributeTypeBuilder::default()
-                        .attribute_id("object.uncertainty")
+                        .attribute_id(AttributeIdentifiers::Other("object.uncertainty".to_string()))
                         .include_in_result(false)
                         .attribute_value(vec![
                             AttributeValueTypeBuilder::default()
@@ -153,7 +153,7 @@ fn create_request() -> RequestType {
                         ]) // vec attribute_value
                         .build().unwrap(), // AttributeType
                     AttributeTypeBuilder::default()
-                        .attribute_id("object.baserate")
+                        .attribute_id(AttributeIdentifiers::Other("object.baserate".to_string()))
                         .include_in_result(false)
                         .attribute_value(vec![
                             AttributeValueTypeBuilder::default()
@@ -168,7 +168,7 @@ fn create_request() -> RequestType {
                 .category(Categories::Action)
                 .attribute(vec![
                     AttributeTypeBuilder::default()
-                        .attribute_id("request_context")
+                        .attribute_id(AttributeIdentifiers::Other("request_context".to_string()))
                         .include_in_result(false)
                         .attribute_value(vec![
                             AttributeValueTypeBuilder::default()
@@ -197,13 +197,13 @@ fn create_discounting_belief() -> ExpressionType {
             .description("Calculate data-based belief value")
             .expression(vec![
                 ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
-                    .attribute_id("node_trust_projected_probability")
+                    .attribute_id(AttributeIdentifiers::Other("node_trust_projected_probability".to_string()))
                     .data_type(DataType::Double)
                     .category(Categories::Resource)
                     .must_be_present(true)
                     .build().unwrap()),
                 ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
-                    .attribute_id("data_trust_belief")
+                    .attribute_id(AttributeIdentifiers::Other("data_trust_belief".to_string()))
                     .data_type(DataType::Double)
                     .category(Categories::Resource)
                     .must_be_present(true)
@@ -238,7 +238,7 @@ fn create_discounting_uncertainty() -> ExpressionType {
                         .description("Multiply supporting belief with projected probability")
                         .expression(vec![
                             ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
-                                .attribute_id("node_trust_projected_probability")
+                                .attribute_id(AttributeIdentifiers::Other("node_trust_projected_probability".to_string()))
                                 .data_type(DataType::Double)
                                 .category(Categories::Resource)
                                 .must_be_present(true)
@@ -249,7 +249,7 @@ fn create_discounting_uncertainty() -> ExpressionType {
                                     .description("Sum up belief in x=X to calculate uncertainty")
                                     .expression(vec![
                                         ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
-                                            .attribute_id("Belief supporting trust in data")
+                                            .attribute_id(AttributeIdentifiers::Other("Belief supporting trust in data".to_string()))
                                             .data_type(DataType::Double)
                                             .category(Categories::Resource)
                                             .must_be_present(true)

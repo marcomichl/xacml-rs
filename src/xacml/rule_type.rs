@@ -116,7 +116,7 @@ mod rule_test{
                                     .value(Value::String("vehicle_cam_acceptance".to_string()))
                                     .build().unwrap()) //AttributeValueTypeBuilder
                                 .attribute_designator(AttributeDesignatorTypeBuilder::default()
-                                    .attribute_id("request_context")
+                                    .attribute_id(AttributeIdentifiers::Other("request-context".to_string()))
                                     .data_type(DataType::Integer)
                                     .category(Categories::Resource)
                                     .must_be_present(true)
@@ -142,7 +142,7 @@ mod rule_test{
                                     .value(Value::Integer(5))
                                     .build().unwrap()) //AttributeValueTypeBuilder
                                 .attribute_designator(AttributeDesignatorTypeBuilder::default()
-                                    .attribute_id("request_context")
+                                    .attribute_id(AttributeIdentifiers::Other("request-context".to_string()))
                                     .data_type(DataType::Integer)
                                     .category(Categories::Resource)
                                     .must_be_present(true)
@@ -156,7 +156,7 @@ mod rule_test{
                 .expression(ExpressionType::Apply(ApplyTypeBuilder::default()
                     .function_id(FunctionId::IntegerEqual)
                     .expression(vec![ExpressionType::AttributeDesignator(AttributeDesignatorTypeBuilder::default()
-                            .attribute_id("request_context")
+                            .attribute_id(AttributeIdentifiers::Other("request-context".to_string()))
                             .data_type(DataType::Integer)
                             .category(Categories::Resource)
                             .must_be_present(true)
@@ -181,7 +181,7 @@ mod rule_test{
                 .category(Categories::Resource)
                 .attribute(vec![
                     AttributeTypeBuilder::default()
-                        .attribute_id("request_context")
+                        .attribute_id(AttributeIdentifiers::Other("request-context".to_string()))
                         .include_in_result(false)
                         .attribute_value(vec![
                             AttributeValueTypeBuilder::default()

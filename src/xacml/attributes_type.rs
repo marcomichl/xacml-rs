@@ -58,32 +58,32 @@ mod attributes_type_test{
     #[test]
     fn get_value_by_selector_test() {
         let designator1 = AttributeDesignatorTypeBuilder::default()
-            .attribute_id("Test-ID")
+            .attribute_id(AttributeIdentifiers::Other("Test-ID".to_string()))
             .category(Categories::Resource)
             .data_type(DataType::Boolean)
             .must_be_present(true)
             .build().unwrap();
         let designator2 = AttributeDesignatorTypeBuilder::default()
-            .attribute_id("Test-ID")
+            .attribute_id(AttributeIdentifiers::Other("Test-ID".to_string()))
             .category(Categories::Resource)
             .data_type(DataType::Integer)
             .must_be_present(true)
             .build().unwrap();
         let designator3 = AttributeDesignatorTypeBuilder::default()
-            .attribute_id("Test-ID")
+            .attribute_id(AttributeIdentifiers::Other("Test-ID".to_string()))
             .category(Categories::Resource)
             .data_type(DataType::Double)
             .must_be_present(true)
             .build().unwrap();
         let designator4 = AttributeDesignatorTypeBuilder::default()
-            .attribute_id("Test-ID")
+            .attribute_id(AttributeIdentifiers::Other("Test-ID".to_string()))
             .category(Categories::Resource)
             .issuer("Test-Issuer")
             .data_type(DataType::Double)
             .must_be_present(true)
             .build().unwrap();
         let attribute = AttributeTypeBuilder::default()
-            .attribute_id("Test-ID")
+            .attribute_id(AttributeIdentifiers::Other("Test-ID".to_string()))
             .include_in_result(true)
             .attribute_value(vec![AttributeValueTypeBuilder::default()
                 .data_type(DataType::Boolean)

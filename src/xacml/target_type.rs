@@ -86,7 +86,7 @@ mod test_target_type{
                                 .value(Value::String("vehicle_cam_acceptance".to_string()))
                                 .build().unwrap()) //AttributeValueTypeBuilder
                             .attribute_designator(AttributeDesignatorTypeBuilder::default()
-                                .attribute_id("request_context")
+                                .attribute_id(AttributeIdentifiers::Other("request-context".to_string()))
                                 .data_type(DataType::String)
                                 .category(Categories::Resource)
                                 .must_be_present(true)
@@ -109,7 +109,7 @@ mod test_target_type{
                                     .value(Value::String("vehicle_cam_acceptance".to_string()))
                                     .build().unwrap()) //AttributeValueTypeBuilder
                                 .attribute_designator(AttributeDesignatorTypeBuilder::default()
-                                    .attribute_id("request_context")
+                                    .attribute_id(AttributeIdentifiers::Other("request-context".to_string()))
                                     .data_type(DataType::String)
                                     .category(Categories::Resource)
                                     .must_be_present(true)
@@ -122,7 +122,7 @@ mod test_target_type{
                                     .value(Value::Double(0.2.into()))
                                     .build().unwrap()) //AttributeValueTypeBuilder
                                 .attribute_designator(AttributeDesignatorTypeBuilder::default()
-                                    .attribute_id("object.belief")
+                                    .attribute_id(AttributeIdentifiers::Other(AttributeIdentifiers::Other("object.belief".to_string()).to_string()))
                                     .data_type(DataType::Double)
                                     .category(Categories::Action)
                                     .must_be_present(true)
@@ -146,7 +146,7 @@ mod test_target_type{
                                     .value(Value::String("vehicle_cam_acceptance".to_string()))
                                     .build().unwrap()) //AttributeValueTypeBuilder
                                 .attribute_designator(AttributeDesignatorTypeBuilder::default()
-                                    .attribute_id("request_context")
+                                    .attribute_id(AttributeIdentifiers::Other("request-context".to_string()))
                                     .data_type(DataType::String)
                                     .category(Categories::Resource)
                                     .must_be_present(true)
@@ -159,7 +159,7 @@ mod test_target_type{
                                     .value(Value::Double(0.2.into()))
                                     .build().unwrap()) //AttributeValueTypeBuilder
                                 .attribute_designator(AttributeDesignatorTypeBuilder::default()
-                                    .attribute_id("object.belief")
+                                    .attribute_id(AttributeIdentifiers::Other("object.belief".to_string()))
                                     .data_type(DataType::Double)
                                     .category(Categories::Action)
                                     .must_be_present(true)
@@ -184,7 +184,7 @@ mod test_target_type{
                                             .value(Value::Double(0.5.into()))
                                             .build().unwrap()) //AttributeValueTypeBuilder
                                         .attribute_designator(AttributeDesignatorTypeBuilder::default()
-                                            .attribute_id("object.belief")
+                                            .attribute_id(AttributeIdentifiers::Other("object.belief".to_string()))
                                             .data_type(DataType::Double)
                                             .category(Categories::Action)
                                             .must_be_present(true)
@@ -203,7 +203,7 @@ mod test_target_type{
                                             .value(Value::String("vehicle_cam_acceptance".to_string()))
                                             .build().unwrap()) //AttributeValueTypeBuilder
                                         .attribute_designator(AttributeDesignatorTypeBuilder::default()
-                                            .attribute_id("request_context")
+                                            .attribute_id(AttributeIdentifiers::Other("request-context".to_string()))
                                             .data_type(DataType::String)
                                             .category(Categories::Resource)
                                             .must_be_present(true)
@@ -230,7 +230,7 @@ mod test_target_type{
                                             .value(Value::Double(0.5.into()))
                                             .build().unwrap()) //AttributeValueTypeBuilder
                                         .attribute_designator(AttributeDesignatorTypeBuilder::default()
-                                            .attribute_id("object.belief")
+                                            .attribute_id(AttributeIdentifiers::Other("object.belief".to_string()))
                                             .data_type(DataType::Double)
                                             .category(Categories::Action)
                                             .must_be_present(true)
@@ -247,7 +247,7 @@ mod test_target_type{
                                             .value(Value::String("vehicle_cam_acceptance".to_string()))
                                             .build().unwrap()) //AttributeValueTypeBuilder
                                         .attribute_designator(AttributeDesignatorTypeBuilder::default()
-                                            .attribute_id("request_context")
+                                            .attribute_id(AttributeIdentifiers::Other("request-context".to_string()))
                                             .data_type(DataType::String)
                                             .category(Categories::Resource)
                                             .must_be_present(true)
@@ -271,7 +271,7 @@ mod test_target_type{
                     .category(Categories::Action)
                     .attribute(vec![
                         AttributeTypeBuilder::default()
-                            .attribute_id("object.belief")
+                            .attribute_id(AttributeIdentifiers::Other("object.belief".to_string()))
                             .include_in_result(false)
                             .attribute_value(vec![
                                 AttributeValueTypeBuilder::default()
@@ -281,7 +281,7 @@ mod test_target_type{
                             ]) // vec attribute_value
                             .build().unwrap(), // AttributeType
                         AttributeTypeBuilder::default()
-                            .attribute_id("object.uncertainty")
+                            .attribute_id(AttributeIdentifiers::Other("object.uncertainty".to_string()))
                             .include_in_result(false)
                             .attribute_value(vec![
                                 AttributeValueTypeBuilder::default()
@@ -291,7 +291,7 @@ mod test_target_type{
                             ]) // vec attribute_value
                             .build().unwrap(), // AttributeType
                         AttributeTypeBuilder::default()
-                            .attribute_id("object.baserate")
+                            .attribute_id(AttributeIdentifiers::Other("object.baserate".to_string()))
                             .include_in_result(false)
                             .attribute_value(vec![
                                 AttributeValueTypeBuilder::default()
@@ -306,7 +306,7 @@ mod test_target_type{
                     .category(Categories::Resource)
                     .attribute(vec![
                         AttributeTypeBuilder::default()
-                            .attribute_id("request_context")
+                            .attribute_id(AttributeIdentifiers::Other("request-context".to_string()))
                             .include_in_result(false)
                             .attribute_value(vec![
                                 AttributeValueTypeBuilder::default()
