@@ -24,8 +24,6 @@ Cargo.lock
 
 /target
 
-*.xml
-
 /.vscode
 
 /venv

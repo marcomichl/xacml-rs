@@ -1,0 +1,22 @@
+<Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:double-subtract"
+    Description="Calculate data-based uncertainty value">
+    <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#double">1</AttributeValue>
+    <Apply
+        FunctionId="urn:oasis:names:tc:xacml:1.0:function:double-multiply"
+        Description="Multiply supporting belief with projected probability">
+        <AttributeDesignator
+            AttributeId="urn:example.com:xacml:attributes:node:projected_probabilityf"
+            DataType="http://www.w3.org/2001/XMLSchema#double"
+            Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+            MustBePresent="true" />
+        <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:double-add"
+            Description="Sum up belief in x=X to calculate uncertainty">
+            <AttributeDesignator
+                AttributeId="urn:example.com:xacml:attributes:data:supporting_belief"
+                DataType="http://www.w3.org/2001/XMLSchema#double"
+                Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+                MustBePresent="true" />
+        </Apply>
+    </Apply>
+</Apply>
+                        

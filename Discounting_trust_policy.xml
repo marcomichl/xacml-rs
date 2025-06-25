@@ -1,0 +1,104 @@
+<Policy PolicyId="urn:example.com:xacml:policy:sl_check_projected_probability " Version="0.1"
+    RuleCombiningAlgId="urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-unless-permit">
+    <Description>Checks if the projected probability is higher than the RTL</Description>
+    <Target>
+        <AnyOf>
+            <AllOf>
+                <Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+                    <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">
+                        CIM_received_data</AttributeValue>
+                    <AttributeDesignator AttributeId="urn:example.com:xacml:attribute:context"
+                        DataType="http://www.w3.org/2001/XMLSchema#string"
+                        Category="urn:oasis:names:tc:xacml:1.0:subject-category:recipient-subject"
+                        MustBePresent="true" />
+                </Match>
+            </AllOf>
+        </AnyOf>
+    </Target>
+    <Rule RuleId="urn:example.com:xacml:rule:trust_discounting" Effect="Permit">
+        <Condition>
+            <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:double-greater-than">
+                <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:double-add"
+                    Description="Add belief to product of base rate and uncertainty">
+                    <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:double-multiply"
+                        Description="Multiply supporting belief with projected probability">
+                        <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:double-add"
+                            Description="Add belief to product of base rate and uncertainty">
+                            <AttributeDesignator
+                                AttributeId="urn:example.com:xacml:attribute:object:belief"
+                                DataType="http://www.w3.org/2001/XMLSchema#double"
+                                Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+                                MustBePresent="true" />
+                            <Apply
+                                FunctionId="urn:oasis:names:tc:xacml:1.0:function:double-multiply"
+                                Description="Multiply belief and base rate">
+                                <AttributeDesignator
+                                    AttributeId="urn:example.com:xacml:attribute:object:uncertainty"
+                                    DataType="http://www.w3.org/2001/XMLSchema#double"
+                                    Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+                                    MustBePresent="true" />
+                                <AttributeDesignator
+                                    AttributeId="urn:example.com:xacml:attribute:object:baserate"
+                                    DataType="http://www.w3.org/2001/XMLSchema#double"
+                                    Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+                                    MustBePresent="true" />
+                            </Apply>
+                        </Apply>
+                        <AttributeDesignator
+                            AttributeId="urn:example.com:xacml:attributes:data:supporting_belief"
+                            DataType="http://www.w3.org/2001/XMLSchema#double"
+                            Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+                            MustBePresent="true" />
+                    </Apply>
+                    <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:double-multiply"
+                        Description="Multiply belief and base rate">
+                        <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:double-subtract"
+                            Description="Calculate data-based uncertainty value">
+                            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#double">1</AttributeValue>
+                            <Apply
+                                FunctionId="urn:oasis:names:tc:xacml:1.0:function:double-multiply"
+                                Description="Multiply supporting belief with projected probability">
+                                <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:double-add"
+                                    Description="Add belief to product of base rate and uncertainty">
+                                    <AttributeDesignator
+                                        AttributeId="urn:example.com:xacml:attribute:object:belief"
+                                        DataType="http://www.w3.org/2001/XMLSchema#double"
+                                        Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+                                        MustBePresent="true" />
+                                    <Apply
+                                        FunctionId="urn:oasis:names:tc:xacml:1.0:function:double-multiply"
+                                        Description="Multiply belief and base rate">
+                                        <AttributeDesignator
+                                            AttributeId="urn:example.com:xacml:attribute:object:uncertainty"
+                                            DataType="http://www.w3.org/2001/XMLSchema#double"
+                                            Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+                                            MustBePresent="true" />
+                                        <AttributeDesignator
+                                            AttributeId="urn:example.com:xacml:attribute:object:baserate"
+                                            DataType="http://www.w3.org/2001/XMLSchema#double"
+                                            Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+                                            MustBePresent="true" />
+                                    </Apply>
+                                </Apply>
+                                <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:double-add"
+                                    Description="Sum up belief in x=X to calculate uncertainty">
+                                    <AttributeDesignator
+                                        AttributeId="urn:example.com:xacml:attributes:data:supporting_belief"
+                                        DataType="http://www.w3.org/2001/XMLSchema#double"
+                                        Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+                                        MustBePresent="true" />
+                                </Apply>
+                            </Apply>
+                        </Apply>
+                        <AttributeDesignator
+                            AttributeId="urn:example.com:xacml:attributes:data:baserate"
+                            DataType="http://www.w3.org/2001/XMLSchema#double"
+                            Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+                            MustBePresent="true" />
+                    </Apply>
+                </Apply>
+                <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#double">0.9</AttributeValue>
+            </Apply>
+        </Condition>
+    </Rule>
+</Policy>

@@ -1,0 +1,13 @@
+<Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:double-multiply"
+    Description="Multiply supporting belief with projected probability">
+    <AttributeDesignator 
+        AttributeId="urn:example.com:xacml:attributes:node:projected_probabilityf"
+        DataType="http://www.w3.org/2001/XMLSchema#double" 
+        Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject" 
+        MustBePresent="true" />
+    <AttributeDesignator
+        AttributeId="urn:example.com:xacml:attributes:data:supporting_belief"
+        DataType="http://www.w3.org/2001/XMLSchema#double"
+        Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+        MustBePresent="true" />
+</Apply>
