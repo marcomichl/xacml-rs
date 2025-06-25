@@ -5,7 +5,7 @@ use crate::xacml::RuleTypeBuilder;
 #[allow(unused_imports)]
 use super::*;
 #[allow(unused_imports)]
-use crate::xacml::*;
+use crate::{utils::*, xacml::*};
 
 
 #[test]

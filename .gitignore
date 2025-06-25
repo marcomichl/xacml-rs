@@ -27,3 +27,5 @@ Cargo.lock
 *.xml
 
 /.vscode
+
+/venv

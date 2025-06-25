@@ -29,7 +29,7 @@ impl AttributeType{
     }
 
     pub (super) fn get_attribute_values_by_designator(&self, designator: &AttributeDesignatorType) -> Result<Vec<&AttributeValueType>, XacmlError> {
-        if (self.attribute_id != designator.attribute_id || self.issuer != designator.issuer) {
+        if self.attribute_id != designator.attribute_id || self.issuer != designator.issuer {
             return Ok(vec![])
         }
         let attribute_values: Vec<&AttributeValueType> = self.attribute_value.iter()

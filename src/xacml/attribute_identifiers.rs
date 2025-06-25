@@ -1,4 +1,4 @@
-use std::{fmt, str::FromStr};
+use std::{borrow::Cow, fmt, str::FromStr};
 use super::*;
 
 
@@ -22,25 +22,30 @@ pub enum AttributeIdentifiers{
     ResourceSimpleFileName,
     ActionId,
     ImpliedAction,
-    Other(String)
+    // Custom IDs here..
+    Other(String),
+    TrusteeBelief
 }
 
-const CATEGORY_MAPPING : &[(AttributeIdentifiers, &str)] = &[
-    (AttributeIdentifiers::DnsName, "urn:oasis:names:tc:xacml:1.0:subject:authn-locality:dns-name"),
-    (AttributeIdentifiers::IpAddress, "urn:oasis:names:tc:xacml:1.0:subject:authn-locality:ip-address"),
-    (AttributeIdentifiers::AuthenticationMethod, "urn:oasis:names:tc:xacml:1.0:subject:authentication-method"),
-    (AttributeIdentifiers::AuthenticationTime, "urn:oasis:names:tc:xacml:1.0:subject:authentication-time"),
-    (AttributeIdentifiers::KeyInfo, "urn:oasis:names:tc:xacml:1.0:subject:key-info"),
-    (AttributeIdentifiers::RequestTime, "urn:oasis:names:tc:xacml:1.0:subject:request-time"),
-    (AttributeIdentifiers::SessionStartTime, "urn:oasis:names:tc:xacml:1.0:subject:session-start-time"),
-    (AttributeIdentifiers::SubjectId, "urn:oasis:names:tc:xacml:1.0:subject:subject-id"),
-    (AttributeIdentifiers::SubjectIdQualifier, "urn:oasis:names:tc:xacml:1.0:subject:subject-id-qualifier"),
-    (AttributeIdentifiers::ResourceLocation, "urn:oasis:names:tc:xacml:1.0:resource:resource-location"),
-    (AttributeIdentifiers::ResourceId, "urn:oasis:names:tc:xacml:1.0:resource:resource-id"),
-    (AttributeIdentifiers::ResourceSimpleFileName, "urn:oasis:names:tc:xacml:1.0:resource:simple-file-name"),
-    (AttributeIdentifiers::ActionId, "urn:oasis:names:tc:xacml:1.0:action:action-id"),
-    (AttributeIdentifiers::ImpliedAction, "urn:oasis:names:tc:xacml:1.0:action:implied-action"),
-];
+fn create_mapping() -> Vec<(AttributeIdentifiers, String)> {
+    vec![
+        (AttributeIdentifiers::DnsName, "urn:oasis:names:tc:xacml:1.0:subject:authn-locality:dns-name".to_string()),
+        (AttributeIdentifiers::IpAddress, "urn:oasis:names:tc:xacml:1.0:subject:authn-locality:ip-address".to_string()),
+        (AttributeIdentifiers::AuthenticationMethod, "urn:oasis:names:tc:xacml:1.0:subject:authentication-method".to_string()),
+        (AttributeIdentifiers::AuthenticationTime, "urn:oasis:names:tc:xacml:1.0:subject:authentication-time".to_string()),
+        (AttributeIdentifiers::KeyInfo, "urn:oasis:names:tc:xacml:1.0:subject:key-info".to_string()),
+        (AttributeIdentifiers::RequestTime, "urn:oasis:names:tc:xacml:1.0:subject:request-time".to_string()),
+        (AttributeIdentifiers::SessionStartTime, "urn:oasis:names:tc:xacml:1.0:subject:session-start-time".to_string()),
+        (AttributeIdentifiers::SubjectId, "urn:oasis:names:tc:xacml:1.0:subject:subject-id".to_string()),
+        (AttributeIdentifiers::SubjectIdQualifier, "urn:oasis:names:tc:xacml:1.0:subject:subject-id-qualifier".to_string()),
+        (AttributeIdentifiers::ResourceLocation, "urn:oasis:names:tc:xacml:1.0:resource:resource-location".to_string()),
+        (AttributeIdentifiers::ResourceId, "urn:oasis:names:tc:xacml:1.0:resource:resource-id".to_string()),
+        (AttributeIdentifiers::ResourceSimpleFileName, "urn:oasis:names:tc:xacml:1.0:resource:simple-file-name".to_string()),
+        (AttributeIdentifiers::ActionId, "urn:oasis:names:tc:xacml:1.0:action:action-id".to_string()),
+        (AttributeIdentifiers::ImpliedAction, "urn:oasis:names:tc:xacml:1.0:action:implied-action".to_string()),
+        (AttributeIdentifiers::TrusteeBelief, format!("urn:{}:xacml:attribute:trustee:belief", URN_NAMESPACE))
+    ]
+}
 
 
 impl FromStr for AttributeIdentifiers {
@@ -48,7 +53,7 @@ impl FromStr for AttributeIdentifiers {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> 
     {
-        CATEGORY_MAPPING
+        create_mapping()
             .iter()
             .find(|(_, v)| *v == s)
             .map(|(k, _)| k.clone())
@@ -58,16 +63,15 @@ impl FromStr for AttributeIdentifiers {
 }
 
 impl AttributeIdentifiers {
-    pub fn to_xacml_id(&self) -> &str {
-        CATEGORY_MAPPING
-            .iter()
-            .find(|(k, _)| *k == *self)
-            .map(|(_, v)| *v)
-            .or_else(|| match self {
-                AttributeIdentifiers::Other(s) => Some(s),
-                _ => Some("")
-            })
-            .unwrap()
+    pub fn to_xacml_id(&self) -> String {
+    if let Some((_, value)) = create_mapping().into_iter().find(|(k, _)| *k == *self) {
+        return value;
+    }
+
+    match self {
+        AttributeIdentifiers::Other(s) => s.clone(),
+        _ => "".to_string(), // fallback: return empty string if nothing matches
+    }
     }
 }
 
@@ -76,7 +80,7 @@ impl Serialize for AttributeIdentifiers {
     where
         S: Serializer,
     {
-        serializer.serialize_str(self.to_xacml_id())
+        serializer.serialize_str(self.to_xacml_id().as_str())
     }
 }
 
@@ -108,7 +112,7 @@ mod attribute_identifiers_test { use quick_xml::de::from_str;
         let categories = create_attribute_identifiers_vec();
         let id_str = categories.iter()
             .map(|c| c.to_xacml_id())
-            .collect::<Vec<&str>>();
+            .collect::<Vec<String>>();
         assert_eq!(id_str, create_id_vec());
 
     }
@@ -154,7 +158,8 @@ mod attribute_identifiers_test { use quick_xml::de::from_str;
             AttributeIdentifiers::ResourceSimpleFileName,
             AttributeIdentifiers::ActionId,
             AttributeIdentifiers::ImpliedAction,
-            AttributeIdentifiers::Other("Other Identifier".to_string())
+            AttributeIdentifiers::Other("Other Identifier".to_string()),
+            AttributeIdentifiers::TrusteeBelief
             ]
     }
 
@@ -174,7 +179,8 @@ mod attribute_identifiers_test { use quick_xml::de::from_str;
             "urn:oasis:names:tc:xacml:1.0:resource:simple-file-name".to_string(),
             "urn:oasis:names:tc:xacml:1.0:action:action-id".to_string(),
             "urn:oasis:names:tc:xacml:1.0:action:implied-action".to_string(),
-            "Other Identifier".to_string()
+            "Other Identifier".to_string(),
+            format!("urn:{}:xacml:attribute:trustee:belief", URN_NAMESPACE)
             ]
     }
 

@@ -4,7 +4,11 @@ use derive_builder::UninitializedFieldError;
 use quick_xml::{de::from_str, se::to_string};
 use serde::{Deserialize, Serialize};
 
-static log_level: LogLevel = LogLevel::DEBUG;
+static LOG_LEVEL: LogLevel = LogLevel::DEBUG;
+/// Namespace used for custom URNs (e.g. attributes, categories, Rule / Policy IDs)
+/// Using RFC6761 compliant namespace for anonymized review of the code
+/// Will later be changed to an owned namepsace
+pub static URN_NAMESPACE: &str = "example.com";
 
 pub fn parse_xml_file<T>(path: &str) -> Result<T, XacmlError>
 where
@@ -26,6 +30,12 @@ where
     fs::write(path, &string)
         .map_err( |_| XacmlError::new(XacmlErrorType::IoError, format!("Error writing to file: {}", path)))?;
     Ok(())
+}
+
+/// Returns a URN-style string with 
+/// urn:{NAMESPACE}:xacml:{s}
+pub fn create_urn(s: &str) -> String {
+    format!("urn:{}:xacml:{}", URN_NAMESPACE, s)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -84,7 +94,7 @@ pub enum LogLevel {
 }
 
 pub fn log(level: LogLevel, msg: &str) {
-    if level >= log_level{    // Later: use a config parameter here
+    if level >= LOG_LEVEL{    // Later: use a config parameter here
         println!("{}", msg)
     }
 }

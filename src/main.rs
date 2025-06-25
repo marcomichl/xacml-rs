@@ -1,14 +1,8 @@
-mod xacml;
-mod utils;
-mod create_files;
-mod pdp;
-mod pap;
-mod sl_policies;
-
 use std::env;
-#[allow(unused_imports)]
-use utils::{parse_xml_file, serialize_to_xml_file};
-use xacml::*;
+
+use xacml_rs::{utils::*, xacml::*};
+
+
 
 fn main() {
  
@@ -23,7 +17,7 @@ fn main() {
     match args[1].as_str() {
         "decideRequest" => {
             if args.len() != 4 {
-                eprintln!("Usage: {} evaluate <policy> <context>", args[0]);
+                println!("Usage: {} evaluate <policy> <context>", args[0]);
                 return;
             }
             let policy = &args[2];
@@ -32,7 +26,7 @@ fn main() {
         }
         "evaluatePolicy" => {
             if args.len() != 4 {
-                eprintln!("Usage: {} evaluate <policy> <context>", args[0]);
+                println!("Usage: {} evaluate <policy> <context>", args[0]);
                 return;
             }
             let policy = &args[2];
@@ -40,7 +34,7 @@ fn main() {
             evaluate_policy(policy, context_id);
         }
         _ => {
-            eprintln!("Unknown command: {}", args[1]);
+            println!("Unknown command: {}", args[1]);
         }
     }
 }
