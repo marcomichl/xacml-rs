@@ -27,3 +27,5 @@ Cargo.lock
 /.vscode
 
 /venv
+
+*DS_Store*
